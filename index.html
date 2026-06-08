@@ -611,13 +611,14 @@ async function downloadDocx() {
           children: [new TextRun({ text: line, font: FONT, size: 20, bold: true, color: "2A7A62" })] }));
         continue;
       }
-      // Tabla
-      if (line.startsWith('|') && line.endsWith('|')) {
+      // Tabla — detecta formato con o sin pipes al inicio/fin
+      const isTableLine = (l) => (l.startsWith('|') && l.endsWith('|')) || (l.includes(' | ') && l.split('|').length >= 3);
+      if (isTableLine(line)) {
         const tLines = [];
         let j = idx - 1;
-        while (j < lines.length && lines[j].trim().startsWith('|')) {
+        while (j < lines.length && isTableLine(lines[j].trim())) {
           const l = lines[j].trim();
-          if (!/^\|[-:\s|]+\|$/.test(l)) tLines.push(l);
+          if (!/^\|?[-:\s|]+\|?$/.test(l)) tLines.push(l);
           j++;
         }
         idx = j;
