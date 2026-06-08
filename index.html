@@ -302,7 +302,7 @@ VERSIÓN: "${lastDocVersion}"
 - Responsables: nombre del rol en negrita + dos puntos + descripción de sus responsabilidades.
 - Actividades agrupadas por subsección numerada. Antes de cada lista de bullets: "Rol: [Área],"
 - Cada bullet empieza con verbo de acción directamente. Sin "Se debe" ni "Es necesario".
-- Excepciones como sub-bullets: "a. Si X: acción. / b. Si Y: acción."
+- Bifurcaciones, excepciones, casos especiales o alertas múltiples: SIEMPRE como sub-bullets con letras (a. b. c.), NUNCA como texto corrido separado por punto y coma o barra. Incorrecto: "Duplicado = rechazo; Cancelado = traslado". Correcto: "a. Duplicado: rechazo inmediato. b. Cancelado: traslada a Jaula."
 - Notas críticas en párrafo aparte: "Nota de Control Crítico:" o "Control Crítico:"
 - Glosario: sigla en negrita + dos puntos + definición concisa.
 - Alcance siempre con "Inicio:" y "Finalización:" explícitos.
@@ -315,11 +315,13 @@ VERSIÓN: "${lastDocVersion}"
 5. ACTIVIDADES — ${dt.activities}
    Formato de subsección:
    ### N. Nombre de la subsección
+   [Párrafo introductorio OBLIGATORIO: 1-2 oraciones que expliquen el propósito o alcance de esa etapa. Siempre antes de los bullets. Ejemplo: "Consiste en el ingreso formal de la mercadería al Site mediante el contraste entre la carga física y el manifiesto digital. Se realiza un escaneo individual de cada bulto para asegurar su trazabilidad."]
    Rol: Nombre del área,
    • Acción imperativa directa.
-   • Acción con sub-casos:
-     a. Si condición: acción.
-     b. Si otra condición: acción.
+   • Acción con bifurcaciones, casos especiales o alertas: SIEMPRE como sub-bullets con letras, NUNCA como texto corrido separado por punto y coma.
+     a. Caso A: acción concreta.
+     b. Caso B: acción concreta.
+     c. Caso C: acción concreta.
 6. VALIDEZ Y REVISIÓN — Siempre literal: "Los documentos tienen una vigencia de 3 años, y pueden sufrir modificaciones antes de su fecha de vencimiento por cambios considerables en el mismo."
 7. INDICADORES DE MEDICIÓN — KPIs y métricas del proceso (o "A definir").
 8. DOCUMENTOS RELACIONADOS — Archivos vinculados (o "N/A").
