@@ -6,7 +6,8 @@
 <title>Agente Documental · OCASA</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js">updateDocVersion('00');
+</script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <style>
@@ -42,6 +43,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);min-
 .doc-title-input:focus{border-color:var(--accent)}
 .doc-title-input.has-value{border-color:var(--accent);background:var(--accent-bg)}
 .title-hint{font-size:9px;color:var(--ink3);line-height:1.3}
+.doc-title-input option{background:var(--surface2);color:var(--ink)}
 .api-config{display:flex;flex-direction:column;gap:5px}
 .api-input-wrap{position:relative}
 .api-input{width:100%;padding:7px 30px 7px 9px;border:1.5px solid var(--border);border-radius:var(--radius-sm);background:var(--surface2);font-size:11px;color:var(--ink);outline:none;transition:border .18s;font-family:monospace}
@@ -173,6 +175,32 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);min-
       </div>
     </div>
     <div>
+      <div class="sidebar-section-title">Código del documento</div>
+      <div class="title-input-wrap">
+        <input type="text" id="doc-code-input" class="doc-title-input" placeholder="Ej: INS-0001" oninput="updateDocCode(this.value)" maxlength="20">
+        <div class="title-hint">Código según política documental (INS/SOP/PRO-XXXX)</div>
+      </div>
+    </div>
+    <div>
+      <div class="sidebar-section-title">Versión</div>
+      <div class="title-input-wrap">
+        <select id="doc-version-input" class="doc-title-input" onchange="updateDocVersion(this.value)" style="cursor:pointer">
+          <option value="00">00 — Documento nuevo</option>
+          <option value="01">01 — Primera actualización</option>
+          <option value="02">02 — Segunda actualización</option>
+          <option value="03">03 — Tercera actualización</option>
+        </select>
+        <div class="title-hint">Vencimiento: <span id="expiry-display">—</span></div>
+      </div>
+    </div>
+    <div>
+      <div class="sidebar-section-title">Área dueña</div>
+      <div class="title-input-wrap">
+        <input type="text" id="doc-area-input" class="doc-title-input" placeholder="Ej: Planeamiento y Excelencia" oninput="updateDocArea(this.value)" maxlength="60">
+        <div class="title-hint">Área responsable del proceso</div>
+      </div>
+    </div>
+    <div>
       <div class="sidebar-section-title">Configuración API</div>
       <div class="api-config">
         <div class="api-input-wrap">
@@ -254,7 +282,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);min-
 </div>
 <script>
 if(typeof pdfjsLib!=='undefined'){pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js'}
-let selectedDocType='proceso',conversationHistory=[],isLoading=false,documentGenerated=false,lastGeneratedDoc='',lastDocTitle='NUEVO DOCUMENTO',pendingAttachments=[],mediaRecorder=null,audioChunks=[],isRecording=false,recordTimerInterval=null,recordSeconds=0,docVersions=[];
+let selectedDocType='proceso',conversationHistory=[],isLoading=false,documentGenerated=false,lastGeneratedDoc='',lastDocTitle='NUEVO DOCUMENTO',pendingAttachments=[],mediaRecorder=null,audioChunks=[],isRecording=false,recordTimerInterval=null,recordSeconds=0,docVersions=[],lastDocCode='',lastDocVersion='00',lastDocArea='';
 const docTypeInfo={
   proceso:{label:'Proceso',code:'PRO',icon:'🗺️',focus:'Qué y Quién a nivel macro. Flujo de roles y tareas principales sin entrar en detalles operativos mínimos.',activities:'Describí la secuencia de tareas a nivel MACRO. Para cada paso, indicá el ROL y la acción principal en modo imperativo.',example:'Rol: Ejecutivo Comercial\n- Realiza preventa.\n- Coordina con el cliente.\n\nRol: PMO\n- Implementa el proyecto.'},
   procedimiento:{label:'Procedimiento',code:'SOP',icon:'📋',focus:'Cómo se lleva a cabo una actividad. Paso a paso técnico con puntos de decisión y controles intermedios.',activities:'Describí el paso a paso en forma de LISTA NUMERADA. Incluí puntos de decisión, controles y responsables por sección.',example:'Rol: Operador de Depósito\n1. Recibe al transportista.\n2. Controla HUs entregados.\n   a. Si coincide → canaliza al área de recepción.\n   b. Si no coincide → inicia reclamo en SAP.'},
@@ -264,6 +292,9 @@ function buildSystemPrompt(){const dt=docTypeInfo[selectedDocType];const titulo=
 
 TIPO ACTUAL: ${dt.label} (${dt.code}) — FOCO: ${dt.focus}
 TÍTULO DEL DOCUMENTO (ya definido por el usuario, NO volver a preguntar): "${titulo}"
+CÓDIGO: "${lastDocCode||'(pendiente)'}"
+VERSIÓN: "${lastDocVersion}"
+ÁREA DUEÑA: "${lastDocArea||'(pendiente — preguntar en Fase 2)'}"
 
 ━━ ESTILO OCASA (aprendido de documentos reales) ━━
 - Tono formal, técnico-operativo, directo. Sin relleno.
@@ -350,6 +381,7 @@ FASE 2 — ENTREVISTA (obligatoria, mínimo 4 turnos antes de generar):
   Turno 2: Responsables (¿Qué roles intervienen? ¿Qué hace cada uno?)
   Turno 3: Actividades — primera parte (pedí que describan los pasos principales)
   Turno 4: Actividades — detalle (casos especiales, excepciones, puntos de control críticos)
+  Turno 2 (además de Responsables): preguntar "¿Qué área es dueña de este proceso?" si no está definida en ÁREA DUEÑA.
   Turno 5 (opcional): Glosario, indicadores, documentos relacionados
 - Después de cada respuesta, resumí brevemente lo que entendiste y hacé las siguientes preguntas.
 - Si una respuesta es vaga, repreguntá antes de avanzar.
@@ -412,7 +444,8 @@ async function sendMessage(){if(isLoading)return;const input=document.getElement
       const docContent=rawDoc;lastGeneratedDoc=docContent;documentGenerated=true;
       if(beforeDoc)addMessage('assistant',beforeDoc);addDocumentMessage(docContent);document.getElementById('new-doc-btn').style.display='flex'}else{addMessage('assistant',reply)}}catch(err){removeTyping(typingId);showError(err.message);conversationHistory.pop()}finally{isLoading=false;document.getElementById('send-btn').disabled=false}}
 function addMessage(role,text,attachmentNames=[]){const chatArea=document.getElementById('chat-area'),msgEl=document.createElement('div');msgEl.className=`msg ${role}`;const avatar=role==='assistant'?'🤖':'👤';const extMap={'webm':'audio','mp3':'audio','wav':'audio','m4a':'audio','pdf':'pdf','docx':'docx','pptx':'pptx','png':'image','jpg':'image','jpeg':'image','bpm':'bizagi','xml':'bizagi'};const iconMap={audio:'🎙️',pdf:'📄',docx:'📝',pptx:'📊',image:'🖼️',bizagi:'🔷',file:'📎'};const pillsHtml=attachmentNames.map(name=>{const ext=name.split('.').pop().toLowerCase();const icon=iconMap[extMap[ext]||'file'];return`<div class="attach-pill">${icon} ${name}</div>`}).join('');msgEl.innerHTML=`<div class="msg-avatar">${avatar}</div><div class="msg-bubble">${pillsHtml}${formatText(text)}</div>`;chatArea.appendChild(msgEl);scrollToBottom()}
-function addDocumentMessage(docContent){const chatArea=document.getElementById('chat-area'),msgEl=document.createElement('div');msgEl.className='msg assistant';const dt=docTypeInfo[selectedDocType];const vIdx=docVersions.length;docVersions.push({content:docContent,title:lastDocTitle,docType:selectedDocType});const vLabel=docVersions.length>1?` <span style="font-size:10px;color:var(--ink3)">v${docVersions.length}</span>`:'';msgEl.innerHTML=`<div class="msg-avatar">🤖</div><div class="msg-bubble"><p>✅ ¡Listo! Acá está el <strong>${lastDocTitle || dt.label}</strong> completo.${vLabel} Revisalo y si necesitás ajustes, avisame.</p><div class="doc-preview"><div class="doc-preview-header"><div class="doc-preview-title">${dt.icon} ${dt.label} · ${dt.code}</div><div class="doc-actions"><button class="doc-btn ghost" onclick="copyDocVersion(${vIdx})">📋 Copiar</button><button class="doc-btn ghost" onclick="downloadDocVersion(${vIdx})">⬇ .txt</button><button class="doc-btn primary" onclick="downloadDocxVersion(event,${vIdx})">📝 Descargar Word</button></div></div><div class="doc-preview-body">${escapeHtml(docContent)}</div></div></div>`;chatArea.appendChild(msgEl);scrollToBottom()}
+function addDocumentMessage(docContent){const chatArea=document.getElementById('chat-area'),msgEl=document.createElement('div');msgEl.className='msg assistant';const dt=docTypeInfo[selectedDocType];const vIdx=docVersions.length;docVersions.push({content:docContent,title:lastDocTitle,docType:selectedDocType});const vLabel=docVersions.length>1?` <span style="font-size:10px;color:var(--ink3)">v${docVersions.length}</span>`:'';msgEl.innerHTML=`<div class="msg-avatar">🤖</div><div class="msg-bubble"><p>✅ ¡Listo! Acá está el <strong>${lastDocTitle || dt.label}</strong> completo.${vLabel} Revisalo y si necesitás ajustes, avisame.</p><div class="doc-preview"><div class="doc-preview-header"><div class="doc-preview-title">${dt.icon} ${dt.label} · ${dt.code}</div><div class="doc-actions"><button class="doc-btn ghost" onclick="copyDocVersion(${vIdx})">📋 Copiar</button><button class="doc-btn ghost" onclick="downloadDocVersion(${vIdx})">⬇ .txt</button><button class="doc-btn primary" onclick="downloadDocxVersion(event,${vIdx})">📝 Descargar Word</button></div></div><div class="doc-preview-body">${escapeHtml(docContent)}</div></div></div>`;chatArea.appendChild(msgEl);scrollToBottom();
+setTimeout(()=>{const warn=document.createElement('div');warn.className='msg assistant';warn.innerHTML=`<div class="msg-avatar">🤖</div><div class="msg-bubble" style="background:#FFF8E1;border-left:3px solid #F59E0B"><p>⚠️ <strong>Recordá</strong>: antes de publicar este documento debe pasar por revisión y aprobación del área de <strong>Planeamiento y Excelencia Operativa</strong>.</p></div>`;document.getElementById('chat-area').appendChild(warn);scrollToBottom();},300);}
 function formatText(text){return text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\*(.*?)\*/g,'<em>$1</em>').replace(/\n\n/g,'</p><p>').replace(/\n/g,'<br>').replace(/^/,'<p>').replace(/$/,'</p>')}
 function escapeHtml(t){return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
 let typingCounter=0;
@@ -424,11 +457,14 @@ function showError(msg){const el=document.getElementById('error-notice');el.text
 function hideError(){document.getElementById('error-notice').classList.remove('show')}
 function selectDocType(btn){document.querySelectorAll('.doc-type-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');selectedDocType=btn.dataset.type}
 function updateDocTitle(val){lastDocTitle=val.trim()||'NUEVO DOCUMENTO';const inp=document.getElementById('doc-title-input');if(val.trim())inp.classList.add('has-value');else inp.classList.remove('has-value')}
+function updateDocCode(val){lastDocCode=val.trim();const inp=document.getElementById('doc-code-input');if(val.trim())inp.classList.add('has-value');else inp.classList.remove('has-value')}
+function updateDocVersion(val){lastDocVersion=val;const d=new Date();d.setFullYear(d.getFullYear()+3);const months=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];const exp=`${String(d.getDate()).padStart(2,'0')}/${months[d.getMonth()]}/${d.getFullYear()}`;document.getElementById('expiry-display').textContent=exp;lastDocVersion=val}
+function updateDocArea(val){lastDocArea=val.trim();const inp=document.getElementById('doc-area-input');if(val.trim())inp.classList.add('has-value');else inp.classList.remove('has-value')}
 function updateApiStatus(){const key=document.getElementById('api-key-input').value.trim(),dot=document.getElementById('status-dot'),text=document.getElementById('status-text');if(key.length>10){dot.className='status-dot ok';text.textContent='API key configurada'}else{dot.className='status-dot';text.textContent='Sin configurar'}}
 function toggleApiVisibility(){const i=document.getElementById('api-key-input');i.type=i.type==='password'?'text':'password'}
 function handleKeydown(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMessage()}}
 function autoResize(el){el.style.height='auto';el.style.height=Math.min(el.scrollHeight,260)+'px'}
-function newConversation(){conversationHistory=[];documentGenerated=false;lastGeneratedDoc='';lastDocTitle='NUEVO DOCUMENTO';pendingAttachments=[];docVersions=[];const ti=document.getElementById('doc-title-input');if(ti){ti.value='';ti.classList.remove('has-value');}renderAttachmentsStrip();document.getElementById('chat-area').innerHTML=`<div class="welcome" id="welcome-screen"><div class="welcome-icon">🤖</div><h2>¿Qué proceso vamos a documentar?</h2><p>Subí archivos, grabá un audio o describí el proceso con tus palabras. Yo te hago preguntas y redacto el documento formal completo.</p><div class="welcome-steps"><div class="welcome-step"><div class="welcome-step-num">1</div> Configurá tu API key</div><div class="welcome-step"><div class="welcome-step-num">2</div> Elegí el tipo de doc</div><div class="welcome-step"><div class="welcome-step-num">3</div> 🎙️ Grabá o adjuntá archivos</div><div class="welcome-step"><div class="welcome-step-num">4</div> Chateá con el agente</div></div></div>`;document.getElementById('new-doc-btn').style.display='none';hideError()}
+function newConversation(){conversationHistory=[];documentGenerated=false;lastGeneratedDoc='';lastDocTitle='NUEVO DOCUMENTO';pendingAttachments=[];docVersions=[];const ti=document.getElementById('doc-title-input');if(ti){ti.value='';ti.classList.remove('has-value');}const ci=document.getElementById('doc-code-input');if(ci){ci.value='';ci.classList.remove('has-value');}const ai=document.getElementById('doc-area-input');if(ai){ai.value='';ai.classList.remove('has-value');}lastDocCode='';lastDocVersion='00';lastDocArea='';renderAttachmentsStrip();document.getElementById('chat-area').innerHTML=`<div class="welcome" id="welcome-screen"><div class="welcome-icon">🤖</div><h2>¿Qué proceso vamos a documentar?</h2><p>Subí archivos, grabá un audio o describí el proceso con tus palabras. Yo te hago preguntas y redacto el documento formal completo.</p><div class="welcome-steps"><div class="welcome-step"><div class="welcome-step-num">1</div> Configurá tu API key</div><div class="welcome-step"><div class="welcome-step-num">2</div> Elegí el tipo de doc</div><div class="welcome-step"><div class="welcome-step-num">3</div> 🎙️ Grabá o adjuntá archivos</div><div class="welcome-step"><div class="welcome-step-num">4</div> Chateá con el agente</div></div></div>`;document.getElementById('new-doc-btn').style.display='none';hideError()}
 function copyDocument(){navigator.clipboard.writeText(lastGeneratedDoc).then(()=>alert('✅ Documento copiado al portapapeles'))}
 function copyDocVersion(idx){const v=docVersions[idx];if(v)navigator.clipboard.writeText(v.content).then(()=>alert('✅ Documento copiado al portapapeles'))}
 function downloadDocument(){const dt=docTypeInfo[selectedDocType],blob=new Blob([lastGeneratedDoc],{type:'text/plain;charset=utf-8'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=`${dt.code}-NUEVO-${new Date().toISOString().slice(0,10)}.txt`;a.click();URL.revokeObjectURL(url)}
@@ -486,13 +522,14 @@ async function downloadDocx() {
     ] });
 
     // FOOTER
+    const fd=new Date();fd.setFullYear(fd.getFullYear()+3);const fmonths=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];const footerExpiry=`${String(fd.getDate()).padStart(2,'0')}/${fmonths[fd.getMonth()]}/${fd.getFullYear()}`;
     const footer = new Footer({ children: [new Paragraph({
       tabStops: [{ type: TabStopType.CENTER, position: 4680 }, { type: TabStopType.RIGHT, position: 9360 }],
       border: { top: { style: BorderStyle.SINGLE, size: 2, color: "CCCCCC", space: 4 } },
       children: [
-        new TextRun({ text: 'BBB-CCCC', font: FONT, size: 14, color: GRAY2 }),
-        new TextRun({ text: '\tVersión XX', font: FONT, size: 14, color: GRAY2 }),
-        new TextRun({ text: '\tVencimiento (DD/MMM/AAAA)', font: FONT, size: 14, color: GRAY2 })
+        new TextRun({ text: lastDocCode||'BBB-CCCC', font: FONT, size: 14, color: GRAY2 }),
+        new TextRun({ text: '\tVersión '+lastDocVersion, font: FONT, size: 14, color: GRAY2 }),
+        new TextRun({ text: '\t'+footerExpiry, font: FONT, size: 14, color: GRAY2 })
       ]
     })] });
 
@@ -515,7 +552,9 @@ async function downloadDocx() {
       { reference: "bl1", levels: [{ level: 0, format: LevelFormat.BULLET, text: "\u2022",
          alignment: AlignmentType.LEFT, style: { paragraph: { indent: { left: 560, hanging: 280 } } } }] },
       { reference: "bl2", levels: [{ level: 0, format: LevelFormat.BULLET, text: "-",
-         alignment: AlignmentType.LEFT, style: { paragraph: { indent: { left: 1000, hanging: 280 } } } }] }
+         alignment: AlignmentType.LEFT, style: { paragraph: { indent: { left: 1000, hanging: 280 } } } }] },
+      { reference: "num1", levels: [{ level: 0, format: LevelFormat.DECIMAL, text: "%1.", alignment: AlignmentType.LEFT, style: { paragraph: { indent: { left: 560, hanging: 280 } } } }] },
+      { reference: "num2", levels: [{ level: 0, format: LevelFormat.LOWER_LETTER, text: "%1.", alignment: AlignmentType.LEFT, style: { paragraph: { indent: { left: 1000, hanging: 280 } } } }] }
     ] };
 
     // PARSEAR LÍNEAS
@@ -527,6 +566,18 @@ async function downloadDocx() {
       );
     }
 
+    // Página ÍNDICE
+    const sectionLines = lastGeneratedDoc.split('\n').filter(l => /^\d+\.\s+[A-ZÁÉÍÓÚÑ]/.test(l.trim()));
+    const indexPage = [
+      new Paragraph({ spacing: { before: 200, after: 300 },
+        children: [new TextRun({ text: 'ÍNDICE', font: FONT, size: 24, bold: true, color: BLACK })] }),
+      ...sectionLines.map(s => new Paragraph({
+        spacing: { before: 80, after: 80 },
+        children: [new TextRun({ text: s.trim(), font: FONT, size: 20, color: BLACK })]
+      })),
+      new Paragraph({ children: [new PageBreak()] })
+    ];
+
     const lines = lastGeneratedDoc.split('\n');
     const body = [];
     let idx = 0;
@@ -535,9 +586,9 @@ async function downloadDocx() {
       if (!line) { body.push(new Paragraph({ spacing: { before: 40, after: 40 }, children: [new TextRun("")] })); continue; }
 
       // Sección principal MAYÚSCULAS numerada o no
-      if (/^\d+\.\s+[A-ZÁÉÍÓÚÑ][A-ZÁÉÍÓÚÑ\s\(\)\/](2,)$/.test(line) || /^[A-ZÁÉÍÓÚÑ][A-ZÁÉÍÓÚÑ\s\(\)\/](4,)$/.test(line)) {
+      if (/^\d+\.\s+[A-ZÁÉÍÓÚÑ][A-ZÁÉÍÓÚÑ\s\(\)\/]{2,}$/.test(line) || /^[A-ZÁÉÍÓÚÑ][A-ZÁÉÍÓÚÑ\s\(\)\/]{4,}$/.test(line)) {
         body.push(new Paragraph({ heading: HeadingLevel.HEADING_1, spacing: { before: 400, after: 120 },
-          children: [new TextRun({ text: line, font: FONT, size: 36, bold: false, color: BLACK })] }));
+          children: [new TextRun({ text: line, font: FONT, size: 24, bold: true, color: TEAL })] }));
         continue;
       }
       // Subsección
@@ -596,10 +647,16 @@ async function downloadDocx() {
           children: bold(line.replace(/^[•\-\*]\s+/, '')) }));
         continue;
       }
-      // Bullet L2
-      if (/^[a-z]\.\s/.test(line) || /^[○]/.test(line)) {
-        body.push(new Paragraph({ numbering: { reference: "bl2", level: 0 }, spacing: { before: 20, after: 20 },
-          children: [new TextRun({ text: line.replace(/^[a-z]\.\s+|^[○]\s*/,''), font: FONT, size: 20, color: GRAY })] }));
+      // Lista numerada L1
+      if (/^\d+\.\s/.test(line) && !/^\d+\.\s+[A-ZÁÉÍÓÚÑ][A-ZÁÉÍÓÚÑ\s\(\)\/]{2,}$/.test(line)) {
+        body.push(new Paragraph({ numbering: { reference: "num1", level: 0 }, spacing: { before: 40, after: 40 },
+          children: bold(line.replace(/^\d+\.\s+/, '')) }));
+        continue;
+      }
+      // Lista L2 (a. b. c.)
+      if (/^[a-zA-Z]\.\s/.test(line) || /^[○]/.test(line)) {
+        body.push(new Paragraph({ numbering: { reference: "num2", level: 0 }, spacing: { before: 20, after: 20 },
+          children: bold(line.replace(/^[a-zA-Z]\.\s+|^[○]\s*/,'')) }));
         continue;
       }
       // Normal
@@ -612,9 +669,8 @@ async function downloadDocx() {
         default: { document: { run: { font: FONT, size: 20, color: BLACK } } },
         paragraphStyles: [
           { id: "Heading1", name: "Heading 1", basedOn: "Normal", next: "Normal", quickFormat: true,
-             run: { size: 36, bold: false, font: FONT, color: BLACK },
-             paragraph: { spacing: { before: 400, after: 120 }, outlineLevel: 0,
-               border: { bottom: { style: BorderStyle.SINGLE, size: 3, color: TEAL, space: 4 } } } },
+             run: { size: 24, bold: true, font: FONT, color: TEAL },
+             paragraph: { spacing: { before: 400, after: 120 }, outlineLevel: 0 } },
           { id: "Heading2", name: "Heading 2", basedOn: "Normal", next: "Normal", quickFormat: true,
              run: { size: 24, bold: true, font: FONT, color: BLACK },
              paragraph: { spacing: { before: 280, after: 80 }, outlineLevel: 1 } }
@@ -624,7 +680,7 @@ async function downloadDocx() {
         properties: { page: { size: { width: 11906, height: 16838 }, margin: { top: 1440, right: 1134, bottom: 1440, left: 1134 } } },
         headers: { default: header },
         footers: { default: footer },
-        children: [...cover, ...body]
+        children: [...cover, ...indexPage, ...body]
       }]
     });
 
