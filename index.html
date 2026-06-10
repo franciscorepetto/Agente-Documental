@@ -28,6 +28,10 @@ body{font-family:'Montserrat',sans-serif;background:var(--bg);color:var(--ink);m
 .doc-type-btn{display:flex;align-items:center;gap:9px;padding:7px 9px;border-radius:var(--radius-sm);border:1.5px solid var(--border);background:transparent;cursor:pointer;text-align:left;transition:all .18s;font-family:'Montserrat',sans-serif;width:100%}
 .doc-type-btn:hover{border-color:var(--border2);background:var(--surface2)}
 .doc-type-btn.active{border-color:var(--accent);background:var(--accent-bg)}
+.doc-type-check{width:14px;height:14px;border-radius:3px;border:1.5px solid var(--border2);background:var(--surface);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .18s}
+.doc-type-btn.active .doc-type-check{background:var(--accent);border-color:var(--accent)}
+.doc-type-btn.active .doc-type-check::after{content:'';display:block;width:4px;height:7px;border:2px solid white;border-top:none;border-left:none;transform:rotate(45deg) translateY(-1px)}
+.doc-title-input:disabled{opacity:.5;cursor:not-allowed;background:var(--surface2)}
 .doc-type-icon{font-size:14px;line-height:1;flex-shrink:0}
 .doc-type-info{flex:1;min-width:0}
 .doc-type-name{font-size:12px;font-weight:600;color:var(--ink);display:flex;align-items:center;gap:5px}
@@ -147,28 +151,31 @@ body{font-family:'Montserrat',sans-serif;background:var(--bg);color:var(--ink);m
     <div>
       <div class="sidebar-section-title">Modalidad</div>
       <div class="doc-types" style="flex-direction:row;gap:4px;margin-bottom:4px">
-        <button class="doc-type-btn active" id="mode-new-btn" onclick="selectDocMode('new',this)" style="flex:1;justify-content:center;padding:6px 4px">
+        <button class="doc-type-btn active" id="mode-new-btn" onclick="selectDocMode('new')" style="flex:1;justify-content:center;padding:6px 4px">
           <div class="doc-type-info"><div class="doc-type-name" style="font-size:11px;justify-content:center">✨ Nuevo</div></div>
         </button>
-        <button class="doc-type-btn" id="mode-update-btn" onclick="selectDocMode('update',this)" style="flex:1;justify-content:center;padding:6px 4px">
+        <button class="doc-type-btn" id="mode-update-btn" onclick="selectDocMode('update')" style="flex:1;justify-content:center;padding:6px 4px">
           <div class="doc-type-info"><div class="doc-type-name" style="font-size:11px;justify-content:center">🔄 Actualizar</div></div>
         </button>
       </div>
       <div class="sidebar-section-title" style="margin-top:8px">Tipo de documento</div>
       <div class="doc-types">
         <button class="doc-type-btn" data-type="proceso" onclick="selectDocType(this)">
+          <div class="doc-type-check"></div>
           <div class="doc-type-icon">🗺️</div>
           <div class="doc-type-info">
             <div class="doc-type-name">Proceso <span class="doc-type-code">PRO</span><span class="doc-type-info-icon">ⓘ<span class="tooltip">Qué y Quién a nivel macro. Flujo de roles y tareas principales sin entrar en detalles operativos mínimos.</span></span></div>
           </div>
         </button>
         <button class="doc-type-btn" data-type="procedimiento" onclick="selectDocType(this)">
+          <div class="doc-type-check"></div>
           <div class="doc-type-icon">📋</div>
           <div class="doc-type-info">
             <div class="doc-type-name">Procedimiento <span class="doc-type-code">SOP</span><span class="doc-type-info-icon">ⓘ<span class="tooltip">Cómo se lleva a cabo una actividad. Paso a paso técnico con puntos de decisión y controles intermedios.</span></span></div>
           </div>
         </button>
         <button class="doc-type-btn" data-type="instructivo" onclick="selectDocType(this)">
+          <div class="doc-type-check"></div>
           <div class="doc-type-icon">🔧</div>
           <div class="doc-type-info">
             <div class="doc-type-name">Instructivo <span class="doc-type-code">INS</span><span class="doc-type-info-icon">ⓘ<span class="tooltip">Ejecución técnica de una tarea muy puntual o el uso de un sistema/herramienta.</span></span></div>
@@ -193,8 +200,8 @@ body{font-family:'Montserrat',sans-serif;background:var(--bg);color:var(--ink);m
     <div>
       <div class="sidebar-section-title">Versión</div>
       <div class="title-input-wrap">
-        <input type="number" id="doc-version-input" class="doc-title-input" min="0" placeholder="0 = Documento nuevo" oninput="updateDocVersion(this.value)" style="cursor:text">
-        <div class="title-hint">Ingresá 0 si es nuevo, o el número de actualización. Vencimiento: <span id="expiry-display">—</span></div>
+        <input type="number" id="doc-version-input" class="doc-title-input" min="0" placeholder="—" oninput="updateDocVersion(this.value)" style="cursor:not-allowed" disabled value="0">
+        <div class="title-hint" id="version-hint">Documento nuevo · siempre versión 00. Vencimiento: <span id="expiry-display">—</span></div>
       </div>
     </div>
     <div>
@@ -487,18 +494,18 @@ function hideWelcome(){const w=document.getElementById('welcome-screen');if(w)w.
 function showError(msg){const el=document.getElementById('error-notice');el.textContent='⚠️ '+msg;el.classList.add('show')}
 function hideError(){document.getElementById('error-notice').classList.remove('show')}
 function selectDocType(btn){document.querySelectorAll('.doc-type-btn[data-type]').forEach(b=>b.classList.remove('active'));btn.classList.add('active');selectedDocType=btn.dataset.type}
-function selectDocMode(mode,btn){docMode=mode;document.getElementById('mode-new-btn').classList.toggle('active',mode==='new');document.getElementById('mode-update-btn').classList.toggle('active',mode==='update')}
+function selectDocMode(mode){docMode=mode;document.getElementById('mode-new-btn').classList.toggle('active',mode==='new');document.getElementById('mode-update-btn').classList.toggle('active',mode==='update');const vi=document.getElementById('doc-version-input');const hint=document.getElementById('version-hint');if(mode==='new'){vi.disabled=true;vi.value='0';vi.style.cursor='not-allowed';lastDocVersion='00';hint.innerHTML='Documento nuevo · siempre versión 00. Vencimiento: <span id="expiry-display">—</span>';}else{vi.disabled=false;vi.value='';vi.style.cursor='text';vi.min='1';vi.placeholder='Ej: 1, 2, 3…';lastDocVersion='';hint.innerHTML='El agente lo detectará del doc. adjunto. Vencimiento: <span id="expiry-display">—</span>';}}
 function updateAuthorName(val){lastAuthorName=val.trim();const inp=document.getElementById('doc-author-name');inp.classList.toggle('has-value',!!val.trim())}
 function updateAuthorPosition(val){lastAuthorPosition=val.trim();const inp=document.getElementById('doc-author-position');inp.classList.toggle('has-value',!!val.trim())}
 function updateDocTitle(val){lastDocTitle=val.trim()||'NUEVO DOCUMENTO';const inp=document.getElementById('doc-title-input');if(val.trim())inp.classList.add('has-value');else inp.classList.remove('has-value')}
 function updateDocCode(val){lastDocCode=val.trim();const inp=document.getElementById('doc-code-input');if(val.trim())inp.classList.add('has-value');else inp.classList.remove('has-value')}
-function updateDocVersion(val){const num=parseInt(val,10);if(val===''||isNaN(num)||num<0){lastDocVersion='00';document.getElementById('expiry-display').textContent='—';return;}lastDocVersion=String(num).padStart(2,'0');const d=new Date();d.setFullYear(d.getFullYear()+3);const months=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];const exp=`${String(d.getDate()).padStart(2,'0')}/${months[d.getMonth()]}/${d.getFullYear()}`;document.getElementById('expiry-display').textContent=exp;const inp=document.getElementById('doc-version-input');if(inp)inp.classList.toggle('has-value',num>=0&&val!=='');}
+function updateDocVersion(val){const num=parseInt(val,10);const expEl=document.getElementById('expiry-display');if(val===''||isNaN(num)||(docMode==='update'&&num<1)||(docMode==='new'&&num!==0)){lastDocVersion=docMode==='new'?'00':'';if(expEl)expEl.textContent='—';return;}lastDocVersion=String(num).padStart(2,'0');const d=new Date();d.setFullYear(d.getFullYear()+3);const months=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];const exp=`${String(d.getDate()).padStart(2,'0')}/${months[d.getMonth()]}/${d.getFullYear()}`;if(expEl)expEl.textContent=exp;const inp=document.getElementById('doc-version-input');if(inp)inp.classList.toggle('has-value',true);}
 function updateDocArea(val){lastDocArea=val.trim();const inp=document.getElementById('doc-area-input');if(val.trim())inp.classList.add('has-value');else inp.classList.remove('has-value')}
 function updateApiStatus(){const key=document.getElementById('api-key-input').value.trim(),dot=document.getElementById('status-dot'),text=document.getElementById('status-text');if(key.length>10){dot.className='status-dot ok';text.textContent='API key configurada'}else{dot.className='status-dot';text.textContent='Sin configurar'}}
 function toggleApiVisibility(){const i=document.getElementById('api-key-input');i.type=i.type==='password'?'text':'password'}
 function handleKeydown(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMessage()}}
 function autoResize(el){el.style.height='auto';el.style.height=Math.min(el.scrollHeight,260)+'px'}
-function newConversation(){conversationHistory=[];documentGenerated=false;lastGeneratedDoc='';lastDocTitle='NUEVO DOCUMENTO';pendingAttachments=[];docVersions=[];const ti=document.getElementById('doc-title-input');if(ti){ti.value='';ti.classList.remove('has-value');}const ci=document.getElementById('doc-code-input');if(ci){ci.value='';ci.classList.remove('has-value');}const ai=document.getElementById('doc-area-input');if(ai){ai.value='';ai.classList.remove('has-value');}lastDocCode='';lastDocVersion='00';lastDocArea='';lastAuthorName='';lastAuthorPosition='';const vi=document.getElementById('doc-version-input');if(vi){vi.value='';vi.classList.remove('has-value');}document.getElementById('expiry-display').textContent='—';const an=document.getElementById('doc-author-name');if(an){an.value='';an.classList.remove('has-value');}const ap=document.getElementById('doc-author-position');if(ap){ap.value='';ap.classList.remove('has-value');}selectedDocType=null;document.querySelectorAll('.doc-type-btn[data-type]').forEach(b=>b.classList.remove('active'));renderAttachmentsStrip();document.getElementById('chat-area').innerHTML=`<div class="welcome" id="welcome-screen"><div class="welcome-icon">🤖</div><h2>¿Qué proceso vamos a documentar?</h2><p>Subí archivos, grabá un audio o describí el proceso con tus palabras. Yo te hago preguntas y redacto el documento formal completo.</p><div class="welcome-steps"><div class="welcome-step"><div class="welcome-step-num">1</div> Configurá tu API key</div><div class="welcome-step"><div class="welcome-step-num">2</div> Elegí el tipo de doc</div><div class="welcome-step"><div class="welcome-step-num">3</div> 🎙️ Grabá o adjuntá archivos</div><div class="welcome-step"><div class="welcome-step-num">4</div> Chateá con el agente</div></div></div>`;document.getElementById('new-doc-btn').style.display='none';hideError()}
+function newConversation(){conversationHistory=[];documentGenerated=false;lastGeneratedDoc='';lastDocTitle='NUEVO DOCUMENTO';pendingAttachments=[];docVersions=[];const ti=document.getElementById('doc-title-input');if(ti){ti.value='';ti.classList.remove('has-value');}const ci=document.getElementById('doc-code-input');if(ci){ci.value='';ci.classList.remove('has-value');}const ai=document.getElementById('doc-area-input');if(ai){ai.value='';ai.classList.remove('has-value');}lastDocCode='';lastDocVersion='00';lastDocArea='';lastAuthorName='';lastAuthorPosition='';docMode='new';selectDocMode('new');const vi=document.getElementById('doc-version-input');if(vi){vi.classList.remove('has-value');}document.getElementById('expiry-display').textContent='—';const an=document.getElementById('doc-author-name');if(an){an.value='';an.classList.remove('has-value');}const ap=document.getElementById('doc-author-position');if(ap){ap.value='';ap.classList.remove('has-value');}selectedDocType=null;document.querySelectorAll('.doc-type-btn[data-type]').forEach(b=>b.classList.remove('active'));renderAttachmentsStrip();document.getElementById('chat-area').innerHTML=`<div class="welcome" id="welcome-screen"><div class="welcome-icon">🤖</div><h2>¿Qué proceso vamos a documentar?</h2><p>Subí archivos, grabá un audio o describí el proceso con tus palabras. Yo te hago preguntas y redacto el documento formal completo.</p><div class="welcome-steps"><div class="welcome-step"><div class="welcome-step-num">1</div> Configurá tu API key</div><div class="welcome-step"><div class="welcome-step-num">2</div> Elegí el tipo de doc</div><div class="welcome-step"><div class="welcome-step-num">3</div> 🎙️ Grabá o adjuntá archivos</div><div class="welcome-step"><div class="welcome-step-num">4</div> Chateá con el agente</div></div></div>`;document.getElementById('new-doc-btn').style.display='none';hideError()}
 function copyDocument(){navigator.clipboard.writeText(lastGeneratedDoc).then(()=>alert('✅ Documento copiado al portapapeles'))}
 function copyDocVersion(idx){const v=docVersions[idx];if(v)navigator.clipboard.writeText(v.content).then(()=>alert('✅ Documento copiado al portapapeles'))}
 function downloadDocument(){const dt=docTypeInfo[selectedDocType],blob=new Blob([lastGeneratedDoc],{type:'text/plain;charset=utf-8'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=`${dt.code}-NUEVO-${new Date().toISOString().slice(0,10)}.txt`;a.click();URL.revokeObjectURL(url)}
