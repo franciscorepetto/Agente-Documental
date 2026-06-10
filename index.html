@@ -308,14 +308,14 @@ VERSIÓN: "${lastDocVersion}"
 - Alcance siempre con "Inicio:" y "Finalización:" explícitos.
 
 ━━ ESTRUCTURA OBLIGATORIA (11 secciones en este orden exacto) ━━
-1. OBJETIVO — 1-2 oraciones. Qué se estandariza y cuál es el propósito.
-2. ALCANCE — "Inicio: ... Finalización: ..." + incluye/excluye si aplica.
-3. RESPONSABLES — Un párrafo por rol. Rol en negrita + sus responsabilidades.
+1. OBJETIVO — Mínimo 3 oraciones. Debe ser específico y mencionar los resultados concretos que se buscan (trazabilidad, integridad física, cumplimiento de SLAs/CPT, etc.). No usar frases genéricas como "estandarizar la operación". Ejemplo correcto: "Establecer el procedimiento para el ingreso sistémico y físico de mercadería, asegurando la trazabilidad individual de cada bulto desde su arribo al Site. Garantizar la integridad física de los envíos y la correcta validación contra el manifiesto digital. Asegurar el cumplimiento de los SLAs operativos y los CPT definidos para cada cliente."
+2. ALCANCE — Formato obligatorio: primero "**Inicio:**" en negrita seguido de la descripción, luego "**Finalización:**" en negrita seguido de la descripción. Si aplica, agregar bullets separados para "**Incluye:**" y "**Excluye:**" con los ítems correspondientes.
+3. RESPONSABLES — Un párrafo por rol. Rol en negrita + sus responsabilidades. Si la fuente de información es informal (notas, audio, conversación), reformulá las responsabilidades en tono formal y técnico. Nunca copies frases coloquiales de la fuente. Ejemplo incorrecto: "Si algo se traba, el escala." Ejemplo correcto: "Gestiona y escala las desviaciones operativas que comprometan el cumplimiento del CPT."
 4. GLOSARIO — Siglas usadas en el doc. Formato: **SIGLA:** Definición.
 5. ACTIVIDADES — ${dt.activities}
    Formato de subsección:
    ### N. Nombre de la subsección
-   [Párrafo introductorio OBLIGATORIO: 1-2 oraciones que expliquen el propósito o alcance de esa etapa. Siempre antes de los bullets. Ejemplo: "Consiste en el ingreso formal de la mercadería al Site mediante el contraste entre la carga física y el manifiesto digital. Se realiza un escaneo individual de cada bulto para asegurar su trazabilidad."]
+   [Párrafo introductorio OBLIGATORIO: 2-3 oraciones en texto corrido que expliquen el propósito y contexto de esa etapa. Siempre antes de los bullets. No tiene rol ni bullets — es prosa pura. Ejemplo: "Consiste en el ingreso formal de la mercadería al Site mediante el contraste entre la carga física y el manifiesto digital. Se realiza un escaneo individual de cada bulto para asegurar su trazabilidad. Esta etapa es crítica para garantizar la integridad del inventario desde el primer contacto con la operación."]
    Rol: Nombre del área,
    • Acción imperativa directa.
    • Acción con bifurcaciones, casos especiales o alertas: SIEMPRE como sub-bullets con letras, NUNCA como texto corrido separado por punto y coma.
@@ -327,7 +327,11 @@ VERSIÓN: "${lastDocVersion}"
 8. DOCUMENTOS RELACIONADOS — Archivos vinculados (o "N/A").
 9. LINKS ÚTILES — URLs con www delante (o "N/A").
 10. HISTORIAL DE REVISIONES — Tabla: Revisión | Fecha | Cambios. Fila inicial: "00 | DD/MMM/AAAA | Creación".
-11. APROBACIÓN — Tabla con filas: Revisión / Aprobación. Columnas: Nombre y Posición | *Firma y fecha.
+11. APROBACIÓN — Tabla con EXACTAMENTE 3 columnas (celda vacía | Nombre y Posición | *Firma y fecha) y 2 filas de datos: "Revisión" y "Aprobación". Nunca generar la tabla sin esas filas. Formato:
+   | | Nombre y Posición | *Firma y fecha |
+   |---|---|---|
+   | Revisión | | |
+   | Aprobación | | |
 
 ━━ EJEMPLOS REALES DE OCASA (usá estos como referencia de estilo) ━━
 
