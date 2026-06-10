@@ -5,27 +5,27 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Agente Documental · OCASA</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js">updateDocVersion('00');
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-:root{--bg:#F5F2ED;--surface:#FDFCFA;--surface2:#F0EDE8;--border:#E2DDD6;--border2:#CFC9BF;--ink:#1C1915;--ink2:#5C5650;--ink3:#9C9790;--accent:#1A5C4A;--accent2:#2A7A62;--accent-bg:#EBF4F0;--accent-border:#B8DDD2;--gold:#C4952A;--gold-bg:#FDF6E7;--red:#B5361E;--red-bg:#FDF0ED;--user-bubble:#1A5C4A;--radius:16px;--radius-sm:10px}
+:root{--bg:#F5F2ED;--surface:#FDFCFA;--surface2:#F0EDE8;--border:#E2DDD6;--border2:#CFC9BF;--ink:#1C1915;--ink2:#5C5650;--ink3:#9C9790;--accent:#1DB4C2;--accent2:#18a0ad;--accent-bg:#E8F8FA;--accent-border:#9ADCE2;--gold:#C4952A;--gold-bg:#FDF6E7;--red:#B5361E;--red-bg:#FDF0ED;--user-bubble:#1DB4C2;--radius:16px;--radius-sm:10px}
 html{scroll-behavior:smooth}
-body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;display:flex;flex-direction:column}
+body{font-family:'Montserrat',sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;display:flex;flex-direction:column}
 .header{background:var(--surface);border-bottom:1px solid var(--border);padding:0 32px;height:64px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
 .header-brand{display:flex;align-items:center;gap:12px}
 .header-logo{width:36px;height:36px;background:var(--accent);border-radius:10px;display:flex;align-items:center;justify-content:center;color:white;font-size:16px}
-.header-title{font-family:'DM Serif Display',serif;font-size:18px;color:var(--ink);letter-spacing:-0.3px}
+.header-title{font-family:'Montserrat',sans-serif;font-size:18px;color:var(--ink);letter-spacing:-0.3px}
 .header-sub{font-size:11px;color:var(--ink3);font-weight:500;letter-spacing:0.5px;text-transform:uppercase}
 .header-badge{font-size:11px;font-weight:600;color:var(--ink3);background:var(--surface2);border:1px solid var(--border);padding:4px 10px;border-radius:20px}
 .app{display:flex;flex:1;min-height:calc(100vh - 64px);align-items:flex-start}
 .sidebar{width:266px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:14px 12px;gap:12px;overflow-y:auto;flex-shrink:0;position:sticky;top:64px;height:calc(100vh - 64px);align-self:flex-start}
 .sidebar-section-title{font-size:9px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--ink3);margin-bottom:5px}
 .doc-types{display:flex;flex-direction:column;gap:3px}
-.doc-type-btn{display:flex;align-items:center;gap:9px;padding:7px 9px;border-radius:var(--radius-sm);border:1.5px solid var(--border);background:transparent;cursor:pointer;text-align:left;transition:all .18s;font-family:'DM Sans',sans-serif;width:100%}
+.doc-type-btn{display:flex;align-items:center;gap:9px;padding:7px 9px;border-radius:var(--radius-sm);border:1.5px solid var(--border);background:transparent;cursor:pointer;text-align:left;transition:all .18s;font-family:'Montserrat',sans-serif;width:100%}
 .doc-type-btn:hover{border-color:var(--border2);background:var(--surface2)}
 .doc-type-btn.active{border-color:var(--accent);background:var(--accent-bg)}
 .doc-type-icon{font-size:14px;line-height:1;flex-shrink:0}
@@ -39,7 +39,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);min-
 .doc-type-info-icon .tooltip::after{content:'';position:absolute;bottom:100%;left:50%;transform:translateX(-50%);border:5px solid transparent;border-bottom-color:var(--ink)}
 .doc-type-info-icon:hover .tooltip,.doc-type-btn:hover .doc-type-info-icon .tooltip{visibility:visible;opacity:1}
 .title-input-wrap{display:flex;flex-direction:column;gap:3px}
-.doc-title-input{width:100%;padding:7px 9px;border:1.5px solid var(--border);border-radius:var(--radius-sm);background:var(--surface2);font-size:11px;color:var(--ink);outline:none;transition:border .18s;font-family:'DM Sans',sans-serif;box-sizing:border-box}
+.doc-title-input{width:100%;padding:7px 9px;border:1.5px solid var(--border);border-radius:var(--radius-sm);background:var(--surface2);font-size:11px;color:var(--ink);outline:none;transition:border .18s;font-family:'Montserrat',sans-serif;box-sizing:border-box}
 .doc-title-input:focus{border-color:var(--accent)}
 .doc-title-input.has-value{border-color:var(--accent);background:var(--accent-bg)}
 .title-hint{font-size:9px;color:var(--ink3);line-height:1.3}
@@ -48,7 +48,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);min-
 .api-input-wrap{position:relative}
 .api-input{width:100%;padding:7px 30px 7px 9px;border:1.5px solid var(--border);border-radius:var(--radius-sm);background:var(--surface2);font-size:11px;color:var(--ink);outline:none;transition:border .18s;font-family:monospace}
 .api-input:focus{border-color:var(--accent)}
-.api-input::placeholder{color:var(--ink3);font-family:'DM Sans',sans-serif}
+.api-input::placeholder{color:var(--ink3);font-family:'Montserrat',sans-serif}
 .api-toggle{position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--ink3);font-size:12px;padding:2px}
 .api-hint{font-size:10px;color:var(--ink3);line-height:1.4}
 .api-hint a{color:var(--accent);text-decoration:none}
@@ -66,7 +66,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);min-
 .chat-area{flex:1;overflow-y:visible;padding:32px 40px;display:flex;flex-direction:column;gap:20px}
 .welcome{margin:auto;text-align:center;max-width:480px;padding:40px 20px}
 .welcome-icon{font-size:48px;margin-bottom:20px}
-.welcome h2{font-family:'DM Serif Display',serif;font-size:24px;color:var(--ink);margin-bottom:10px}
+.welcome h2{font-family:'Montserrat',sans-serif;font-size:24px;color:var(--ink);margin-bottom:10px}
 .welcome p{font-size:14px;color:var(--ink2);line-height:1.6;margin-bottom:24px}
 .welcome-steps{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
 .welcome-step{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--ink2);background:var(--surface);border:1px solid var(--border);padding:8px 14px;border-radius:20px}
@@ -85,7 +85,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);min-
 .doc-preview-header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--border);background:var(--surface)}
 .doc-preview-title{font-size:12px;font-weight:600;color:var(--ink)}
 .doc-actions{display:flex;gap:8px}
-.doc-btn{font-family:'DM Sans',sans-serif;font-size:11px;font-weight:600;padding:5px 12px;border-radius:6px;cursor:pointer;transition:all .15s}
+.doc-btn{font-family:'Montserrat',sans-serif;font-size:11px;font-weight:600;padding:5px 12px;border-radius:6px;cursor:pointer;transition:all .15s}
 .doc-btn.ghost{background:transparent;border:1.5px solid var(--border);color:var(--ink2)}
 .doc-btn.ghost:hover{border-color:var(--accent);color:var(--accent)}
 .doc-btn.primary{background:var(--accent);border:1.5px solid var(--accent);color:white}
@@ -109,7 +109,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);min-
 .input-action-btn:hover{background:var(--border);color:var(--ink2)}
 .input-action-btn.recording{color:var(--red);animation:pulse-anim 1s infinite}
 @keyframes pulse-anim{0%,100%{opacity:1}50%{opacity:.4}}
-#user-input{flex:1;border:none;background:transparent;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--ink);outline:none;resize:none;min-height:24px;max-height:260px;line-height:1.6;overflow-y:auto}
+#user-input{flex:1;border:none;background:transparent;font-family:'Montserrat',sans-serif;font-size:14px;color:var(--ink);outline:none;resize:none;min-height:24px;max-height:260px;line-height:1.6;overflow-y:auto}
 #user-input::placeholder{color:var(--ink3)}
 #file-input{display:none}
 .send-btn{width:36px;height:36px;border-radius:10px;border:none;background:var(--accent);color:white;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .18s;flex-shrink:0}
@@ -117,7 +117,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);min-
 .send-btn:disabled{background:var(--border2);cursor:not-allowed}
 .send-btn svg{width:16px;height:16px}
 .input-hint{font-size:11px;color:var(--ink3);text-align:center;margin-top:10px}
-.new-doc-btn{display:flex;align-items:center;gap:6px;padding:7px 14px;border-radius:8px;border:1.5px solid var(--border);background:transparent;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;color:var(--ink2);cursor:pointer;transition:all .18s;margin-bottom:10px}
+.new-doc-btn{display:flex;align-items:center;gap:6px;padding:7px 14px;border-radius:8px;border:1.5px solid var(--border);background:transparent;font-family:'Montserrat',sans-serif;font-size:12px;font-weight:600;color:var(--ink2);cursor:pointer;transition:all .18s;margin-bottom:10px}
 .new-doc-btn:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-bg)}
 ::-webkit-scrollbar{width:6px}
 ::-webkit-scrollbar-track{background:transparent}
@@ -184,13 +184,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);min-
     <div>
       <div class="sidebar-section-title">Versión</div>
       <div class="title-input-wrap">
-        <select id="doc-version-input" class="doc-title-input" onchange="updateDocVersion(this.value)" style="cursor:pointer">
-          <option value="00">00 — Documento nuevo</option>
-          <option value="01">01 — Primera actualización</option>
-          <option value="02">02 — Segunda actualización</option>
-          <option value="03">03 — Tercera actualización</option>
-        </select>
-        <div class="title-hint">Vencimiento: <span id="expiry-display">—</span></div>
+        <input type="number" id="doc-version-input" class="doc-title-input" min="0" placeholder="0 = Documento nuevo" oninput="updateDocVersion(this.value)" style="cursor:text">
+        <div class="title-hint">Ingresá 0 si es nuevo, o el número de actualización. Vencimiento: <span id="expiry-display">—</span></div>
       </div>
     </div>
     <div>
@@ -464,13 +459,13 @@ function hideError(){document.getElementById('error-notice').classList.remove('s
 function selectDocType(btn){document.querySelectorAll('.doc-type-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');selectedDocType=btn.dataset.type}
 function updateDocTitle(val){lastDocTitle=val.trim()||'NUEVO DOCUMENTO';const inp=document.getElementById('doc-title-input');if(val.trim())inp.classList.add('has-value');else inp.classList.remove('has-value')}
 function updateDocCode(val){lastDocCode=val.trim();const inp=document.getElementById('doc-code-input');if(val.trim())inp.classList.add('has-value');else inp.classList.remove('has-value')}
-function updateDocVersion(val){lastDocVersion=val;const d=new Date();d.setFullYear(d.getFullYear()+3);const months=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];const exp=`${String(d.getDate()).padStart(2,'0')}/${months[d.getMonth()]}/${d.getFullYear()}`;document.getElementById('expiry-display').textContent=exp;lastDocVersion=val}
+function updateDocVersion(val){const num=parseInt(val,10);if(val===''||isNaN(num)||num<0){lastDocVersion='00';document.getElementById('expiry-display').textContent='—';return;}lastDocVersion=String(num).padStart(2,'0');const d=new Date();d.setFullYear(d.getFullYear()+3);const months=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];const exp=`${String(d.getDate()).padStart(2,'0')}/${months[d.getMonth()]}/${d.getFullYear()}`;document.getElementById('expiry-display').textContent=exp;const inp=document.getElementById('doc-version-input');if(inp)inp.classList.toggle('has-value',num>=0&&val!=='');}
 function updateDocArea(val){lastDocArea=val.trim();const inp=document.getElementById('doc-area-input');if(val.trim())inp.classList.add('has-value');else inp.classList.remove('has-value')}
 function updateApiStatus(){const key=document.getElementById('api-key-input').value.trim(),dot=document.getElementById('status-dot'),text=document.getElementById('status-text');if(key.length>10){dot.className='status-dot ok';text.textContent='API key configurada'}else{dot.className='status-dot';text.textContent='Sin configurar'}}
 function toggleApiVisibility(){const i=document.getElementById('api-key-input');i.type=i.type==='password'?'text':'password'}
 function handleKeydown(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMessage()}}
 function autoResize(el){el.style.height='auto';el.style.height=Math.min(el.scrollHeight,260)+'px'}
-function newConversation(){conversationHistory=[];documentGenerated=false;lastGeneratedDoc='';lastDocTitle='NUEVO DOCUMENTO';pendingAttachments=[];docVersions=[];const ti=document.getElementById('doc-title-input');if(ti){ti.value='';ti.classList.remove('has-value');}const ci=document.getElementById('doc-code-input');if(ci){ci.value='';ci.classList.remove('has-value');}const ai=document.getElementById('doc-area-input');if(ai){ai.value='';ai.classList.remove('has-value');}lastDocCode='';lastDocVersion='00';lastDocArea='';renderAttachmentsStrip();document.getElementById('chat-area').innerHTML=`<div class="welcome" id="welcome-screen"><div class="welcome-icon">🤖</div><h2>¿Qué proceso vamos a documentar?</h2><p>Subí archivos, grabá un audio o describí el proceso con tus palabras. Yo te hago preguntas y redacto el documento formal completo.</p><div class="welcome-steps"><div class="welcome-step"><div class="welcome-step-num">1</div> Configurá tu API key</div><div class="welcome-step"><div class="welcome-step-num">2</div> Elegí el tipo de doc</div><div class="welcome-step"><div class="welcome-step-num">3</div> 🎙️ Grabá o adjuntá archivos</div><div class="welcome-step"><div class="welcome-step-num">4</div> Chateá con el agente</div></div></div>`;document.getElementById('new-doc-btn').style.display='none';hideError()}
+function newConversation(){conversationHistory=[];documentGenerated=false;lastGeneratedDoc='';lastDocTitle='NUEVO DOCUMENTO';pendingAttachments=[];docVersions=[];const ti=document.getElementById('doc-title-input');if(ti){ti.value='';ti.classList.remove('has-value');}const ci=document.getElementById('doc-code-input');if(ci){ci.value='';ci.classList.remove('has-value');}const ai=document.getElementById('doc-area-input');if(ai){ai.value='';ai.classList.remove('has-value');}lastDocCode='';lastDocVersion='00';lastDocArea='';const vi=document.getElementById('doc-version-input');if(vi){vi.value='';vi.classList.remove('has-value');}document.getElementById('expiry-display').textContent='—';renderAttachmentsStrip();document.getElementById('chat-area').innerHTML=`<div class="welcome" id="welcome-screen"><div class="welcome-icon">🤖</div><h2>¿Qué proceso vamos a documentar?</h2><p>Subí archivos, grabá un audio o describí el proceso con tus palabras. Yo te hago preguntas y redacto el documento formal completo.</p><div class="welcome-steps"><div class="welcome-step"><div class="welcome-step-num">1</div> Configurá tu API key</div><div class="welcome-step"><div class="welcome-step-num">2</div> Elegí el tipo de doc</div><div class="welcome-step"><div class="welcome-step-num">3</div> 🎙️ Grabá o adjuntá archivos</div><div class="welcome-step"><div class="welcome-step-num">4</div> Chateá con el agente</div></div></div>`;document.getElementById('new-doc-btn').style.display='none';hideError()}
 function copyDocument(){navigator.clipboard.writeText(lastGeneratedDoc).then(()=>alert('✅ Documento copiado al portapapeles'))}
 function copyDocVersion(idx){const v=docVersions[idx];if(v)navigator.clipboard.writeText(v.content).then(()=>alert('✅ Documento copiado al portapapeles'))}
 function downloadDocument(){const dt=docTypeInfo[selectedDocType],blob=new Blob([lastGeneratedDoc],{type:'text/plain;charset=utf-8'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=`${dt.code}-NUEVO-${new Date().toISOString().slice(0,10)}.txt`;a.click();URL.revokeObjectURL(url)}
