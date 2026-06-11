@@ -68,7 +68,9 @@ body{font-family:'Montserrat',sans-serif;background:var(--bg);color:var(--ink);m
 .formats-chips{display:flex;flex-wrap:wrap;gap:4px}
 .format-chip{display:inline-flex;align-items:center;gap:3px;font-size:10px;color:var(--accent);background:var(--accent-bg);border:1px solid var(--accent-border);border-radius:5px;padding:2px 6px;font-weight:500;white-space:nowrap}
 .main{flex:1;display:flex;flex-direction:column;min-height:calc(100vh - 64px)}
-.chat-area{flex:1;overflow-y:visible;padding:32px 40px;display:flex;flex-direction:column;gap:20px}
+.chat-area{flex:1;overflow-y:visible;padding:32px 40px;display:flex;flex-direction:column;gap:20px;position:relative}
+.drop-overlay{display:none;position:absolute;inset:0;background:rgba(29,180,194,.12);border:2.5px dashed var(--accent);border-radius:var(--radius);z-index:200;align-items:center;justify-content:center;font-size:15px;font-weight:600;color:var(--accent);pointer-events:none}
+.chat-area.drag-over .drop-overlay{display:flex}
 .welcome{margin:auto;text-align:center;max-width:480px;padding:40px 20px}
 .welcome-icon{font-size:48px;margin-bottom:20px}
 .welcome h2{font-family:'Montserrat',sans-serif;font-size:24px;color:var(--ink);margin-bottom:10px}
@@ -251,7 +253,8 @@ body{font-family:'Montserrat',sans-serif;background:var(--bg);color:var(--ink);m
     </div>
   </aside>
   <main class="main">
-    <div class="chat-area" id="chat-area">
+    <div class="chat-area" id="chat-area" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)">
+      <div class="drop-overlay">📎 Soltá el archivo acá</div>
       <div class="welcome" id="welcome-screen">
         <div class="welcome-icon">🤖</div>
         <h2>¿Qué proceso vamos a documentar?</h2>
@@ -442,14 +445,15 @@ Tu primer mensaje debe:
 FASE 2 — ENTREVISTA (obligatoria, mínimo 5 turnos antes de generar):
 - Nunca generés el documento con un solo mensaje del usuario, no importa cuánta info traiga.
 - REGLA DE ORO: UN TURNO = UNA SECCIÓN. Nunca mezcles preguntas de secciones distintas en el mismo turno.
-- MÁXIMO 3 preguntas por turno. Si necesitás más info de una sección, usá un turno extra para esa misma sección.
-- PROHIBIDO REPETIR: nunca repitas ni parafrasees lo que el usuario acaba de decir. No hagas resúmenes de sus respuestas. Pasá directamente a las preguntas del siguiente turno con una transición de UNA oración como máximo ("Perfecto." / "Entendido." / "Bien.").
+- MÁXIMO 2 preguntas por turno. Elegí las 2 preguntas más importantes de esa sección. Si falta info crítica, usá un turno extra para la misma sección antes de avanzar.
+- Las preguntas deben ser cortas, directas y concretas. Sin explicaciones ni contexto adicional. Ejemplo correcto: "¿Dónde empieza el proceso?" / "¿Qué sistemas se usan?". Ejemplo incorrecto: "Para poder redactar correctamente el alcance, necesito entender mejor cuál es el punto de inicio del proceso y también si hay algún sistema involucrado."
+- PROHIBIDO REPETIR: nunca repitas ni parafrasees lo que el usuario acaba de decir. No hagas resúmenes de sus respuestas. Pasá directamente a las preguntas del siguiente turno con una transición de UNA palabra como máximo ("Perfecto." / "Entendido." / "Bien.").
 - Orden de turnos:
-  Turno 1: OBJETIVO (¿Qué se busca lograr/estandarizar? ¿Qué resultados concretos se esperan?)
-  Turno 2: ALCANCE (¿Dónde empieza y termina el proceso? ¿Qué sitios/áreas/sistemas abarca? ¿Qué excluye?)
-  Turno 3: RESPONSABLES (¿Qué roles intervienen? ¿Qué hace cada uno? + "¿Qué área es dueña?" si no está en ÁREA DUEÑA)
-  Turno 4: ACTIVIDADES — estructura (pedí que describan las etapas o subsecciones principales con sus pasos)
-  Turno 5: ACTIVIDADES — detalle (casos especiales, excepciones, puntos de control críticos, bifurcaciones)
+  Turno 1: OBJETIVO (¿Qué se busca lograr? ¿Qué resultados concretos se esperan?)
+  Turno 2: ALCANCE (¿Dónde empieza y dónde termina? ¿Qué sitios/sistemas abarca?)
+  Turno 3: RESPONSABLES (¿Qué roles intervienen? ¿Qué área es dueña?)
+  Turno 4: ACTIVIDADES — estructura (pedí las etapas principales con sus pasos)
+  Turno 5: ACTIVIDADES — detalle (casos especiales, excepciones, controles críticos)
   Turno 6 (opcional): GLOSARIO, INDICADORES DE MEDICIÓN, DOCUMENTOS RELACIONADOS, ${selectedDocType==='procedimiento'?'LINKS ÚTILES':'ANEXO'}
 - Si una respuesta es vaga, repreguntá dentro del mismo turno antes de avanzar.
 - Si el usuario sube archivos, extraé la info y úsala como base — pero igual recorré los turnos para validar y completar.
@@ -490,6 +494,9 @@ function stopRecording(){if(mediaRecorder&&isRecording){mediaRecorder.stop();med
 async function processAudioRecording(){const blob=new Blob(audioChunks,{type:'audio/webm'});const fileName=`grabacion-${new Date().toISOString().slice(0,19).replace(/:/g,'-')}.webm`;addProcessingTag(fileName);try{const text=await transcribeAudio(blob,fileName);removeProcessingTags();const input=document.getElementById('user-input');input.value=text;autoResize(input);addAttachment({type:'audio',name:fileName,content:`[Audio transcripto]\n${text}`})}catch(err){removeProcessingTags();showError('Error al transcribir: '+err.message)}}
 async function transcribeAudio(blob,fileName){const apiKey=document.getElementById('api-key-input').value.trim();if(!apiKey)throw new Error('Necesitás configurar tu API key de Groq.');const formData=new FormData();formData.append('file',blob,fileName);formData.append('model','whisper-large-v3-turbo');formData.append('language','es');formData.append('response_format','text');const resp=await fetch('https://api.groq.com/openai/v1/audio/transcriptions',{method:'POST',headers:{'Authorization':`Bearer ${apiKey}`},body:formData});if(!resp.ok){const err=await resp.json().catch(()=>({}));throw new Error(err?.error?.message||`Error ${resp.status}`)}return(await resp.text()).trim()}
 async function handleFileSelect(event){const files=Array.from(event.target.files);event.target.value='';for(const file of files){addProcessingTag(file.name);try{const att=await processFile(file);removeProcessingTags();addAttachment(att)}catch(err){removeProcessingTags();showError(`Error procesando "${file.name}": ${err.message}`)}}}
+function handleDragOver(e){e.preventDefault();e.stopPropagation();document.getElementById('chat-area').classList.add('drag-over');}
+function handleDragLeave(e){e.preventDefault();e.stopPropagation();if(!document.getElementById('chat-area').contains(e.relatedTarget)){document.getElementById('chat-area').classList.remove('drag-over');}}
+async function handleDrop(e){e.preventDefault();e.stopPropagation();document.getElementById('chat-area').classList.remove('drag-over');const files=Array.from(e.dataTransfer.files);for(const file of files){addProcessingTag(file.name);try{const att=await processFile(file);removeProcessingTags();addAttachment(att)}catch(err){removeProcessingTags();showError(`Error procesando "${file.name}": ${err.message}`)}}}
 async function processFile(file){const name=file.name,ext=name.split('.').pop().toLowerCase();
 if(['mp3','wav','m4a','webm','ogg','flac'].includes(ext)){const text=await transcribeAudio(file,name);return{type:'audio',name,content:`[Transcripción de audio: ${name}]\n${text}`}}
 if(ext==='pdf'){const text=await extractPdfText(file);return{type:'pdf',name,content:`[Contenido del PDF: ${name}]\n${text}`}}
