@@ -264,7 +264,7 @@ body{font-family:'Montserrat',sans-serif;background:var(--bg);color:var(--ink);m
       </div>
     </div>
     <div class="input-area">
-      <button class="new-doc-btn" onclick="newConversation()" id="new-doc-btn" style="display:none">↩ Nuevo documento</button>
+      <button class="new-doc-btn" onclick="location.reload()" id="new-doc-btn" style="display:none">↩ Nuevo documento</button>
       <div class="record-banner" id="record-banner">
         <div class="record-dot"></div>
         <span id="record-time">0:00</span>
@@ -495,7 +495,9 @@ function hideWelcome(){const w=document.getElementById('welcome-screen');if(w)w.
 function showError(msg){const el=document.getElementById('error-notice');el.textContent='⚠️ '+msg;el.classList.add('show')}
 function hideError(){document.getElementById('error-notice').classList.remove('show')}
 function selectDocType(btn){document.querySelectorAll('.doc-type-btn[data-type]').forEach(b=>b.classList.remove('active'));btn.classList.add('active');selectedDocType=btn.dataset.type}
-function selectDocMode(mode){docMode=mode;document.getElementById('mode-new-btn').classList.toggle('active',mode==='new');document.getElementById('mode-update-btn').classList.toggle('active',mode==='update');const vi=document.getElementById('doc-version-input');const hint=document.getElementById('version-hint');if(mode==='new'){vi.disabled=true;vi.value='0';vi.style.cursor='not-allowed';lastDocVersion='00';hint.innerHTML='Documento nuevo · siempre versión 00. Vencimiento: <span id="expiry-display">—</span>';}else{vi.disabled=false;vi.value='';vi.style.cursor='text';vi.min='1';vi.placeholder='Ej: 1, 2, 3…';lastDocVersion='';hint.innerHTML='El agente lo detectará del doc. adjunto. Vencimiento: <span id="expiry-display">—</span>';}}
+function selectDocMode(mode){const prev=docMode;docMode=mode;document.getElementById('mode-new-btn').classList.toggle('active',mode==='new');document.getElementById('mode-update-btn').classList.toggle('active',mode==='update');const vi=document.getElementById('doc-version-input');const hint=document.getElementById('version-hint');if(mode==='new'){vi.disabled=true;vi.value='0';vi.style.cursor='not-allowed';lastDocVersion='00';hint.innerHTML='Documento nuevo · siempre versión 00. Vencimiento: <span id="expiry-display">—</span>';}else{vi.disabled=false;vi.value='';vi.style.cursor='text';vi.min='1';vi.placeholder='Ej: 1, 2, 3…';lastDocVersion='';hint.innerHTML='El agente lo detectará del doc. adjunto. Vencimiento: <span id="expiry-display">—</span>';}
+// Resetear conversación al cambiar de modo para que el agente arranque desde cero
+if(prev!==mode){conversationHistory=[];documentGenerated=false;lastGeneratedDoc='';docVersions=[];pendingAttachments=[];renderAttachmentsStrip();const chatArea=document.getElementById('chat-area');if(chatArea){chatArea.innerHTML=`<div class="welcome" id="welcome-screen"><div class="welcome-icon">🤖</div><h2>¿Qué proceso vamos a documentar?</h2><p>Subí archivos, grabá un audio o describí el proceso con tus palabras. Yo te hago preguntas y redacto el documento formal completo.</p><div class="welcome-steps"><div class="welcome-step"><div class="welcome-step-num">1</div> Configurá tu API key</div><div class="welcome-step"><div class="welcome-step-num">2</div> Elegí el tipo de doc</div><div class="welcome-step"><div class="welcome-step-num">3</div> 🎙️ Grabá o adjuntá archivos</div><div class="welcome-step"><div class="welcome-step-num">4</div> Chateá con el agente</div></div></div>`;}document.getElementById('new-doc-btn').style.display='none';hideError();}}
 function updateAuthorName(val){lastAuthorName=val.trim();const inp=document.getElementById('doc-author-name');inp.classList.toggle('has-value',!!val.trim())}
 function updateAuthorPosition(val){lastAuthorPosition=val.trim();const inp=document.getElementById('doc-author-position');inp.classList.toggle('has-value',!!val.trim())}
 function updateDocTitle(val){lastDocTitle=val.trim()||'NUEVO DOCUMENTO';const inp=document.getElementById('doc-title-input');if(val.trim())inp.classList.add('has-value');else inp.classList.remove('has-value')}
@@ -613,7 +615,13 @@ async function downloadDocx() {
     const todayD = new Date();
     const todayMonths = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
     const todayStr = `${String(todayD.getDate()).padStart(2,'0')}/${todayMonths[todayD.getMonth()]}/${todayD.getFullYear()}`;
+    // Modo nuevo: reemplazar fecha en fila 00/Creación
     lastGeneratedDoc = lastGeneratedDoc.replace(/(\|\s*00\s*\|)\s*DD\/MMM\/AAAA\s*(\|\s*[Cc]reaci[oó]n)/g, `$1 ${todayStr} $2`);
+    // Modo actualización: reemplazar fecha en la nueva fila de versión agregada por el agente
+    if (docMode === 'update' && lastDocVersion) {
+      const vRe = new RegExp(`(\\|\\s*${lastDocVersion}\\s*\\|)\\s*DD/MMM/AAAA\\s*(\\|)`, 'g');
+      lastGeneratedDoc = lastGeneratedDoc.replace(vRe, `$1 ${todayStr} $2`);
+    }
 
     // Página ÍNDICE
     const sectionLines = lastGeneratedDoc.split('\n').filter(l => /^\d+\.\s+[A-ZÁÉÍÓÚÑ]/.test(l.trim()) && !/^\d+\.\d+/.test(l.trim()));
