@@ -28,6 +28,7 @@ body{font-family:'Montserrat',sans-serif;background:var(--bg);color:var(--ink);m
 .doc-type-btn{display:flex;align-items:center;gap:9px;padding:7px 9px;border-radius:var(--radius-sm);border:1.5px solid var(--border);background:transparent;cursor:pointer;text-align:left;transition:all .18s;font-family:'Montserrat',sans-serif;width:100%}
 .doc-type-btn:hover{border-color:var(--border2);background:var(--surface2)}
 .doc-type-btn.active{border-color:var(--accent);background:var(--accent-bg)}
+.doc-type-btn.locked{pointer-events:none;opacity:.5;cursor:not-allowed}
 .doc-type-check{width:14px;height:14px;border-radius:3px;border:1.5px solid var(--border2);background:var(--surface);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .18s}
 .doc-type-btn.active .doc-type-check{background:var(--accent);border-color:var(--accent)}
 .doc-type-btn.active .doc-type-check::after{content:'';display:block;width:4px;height:7px;border:2px solid white;border-top:none;border-left:none;transform:rotate(45deg) translateY(-1px)}
@@ -510,7 +511,7 @@ function removeProcessingTags(){document.querySelectorAll('.proc-temp').forEach(
 async function callGroq(messages){const apiKey=document.getElementById('api-key-input').value.trim();if(!apiKey)throw new Error('Necesitás configurar tu API key de Groq en el panel izquierdo.');const systemPrompt=buildSystemPrompt();const hasImages=messages.some(m=>Array.isArray(m.content)&&m.content.some(c=>c.type==='image_url'));const model=hasImages?'meta-llama/llama-4-scout-17b-16e-instruct':'llama-3.3-70b-versatile';const resp=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${apiKey}`},body:JSON.stringify({model,max_tokens:4096,messages:[{role:'system',content:systemPrompt},...messages]})});if(!resp.ok){const err=await resp.json().catch(()=>({}));const msg=err?.error?.message||'Error desconocido';if(resp.status===401)throw new Error('API key inválida. Revisá que la copiaste bien desde console.groq.com.');if(resp.status===403)throw new Error('API key sin permisos.');if(resp.status===429)throw new Error('Límite de requests alcanzado. Esperá unos segundos y reintentá.');throw new Error(`Error de API: ${msg}`)}const data=await resp.json();return data.choices?.[0]?.message?.content||'Sin respuesta.'}
 function buildUserMessage(text){if(pendingAttachments.length===0)return{role:'user',content:text||'(sin texto)'};const contentParts=[];const textAtts=pendingAttachments.filter(a=>a.type!=='image');const imgAtts=pendingAttachments.filter(a=>a.type==='image');let fullText=text||'';if(textAtts.length>0){const attText=textAtts.map(a=>a.content).join('\n\n---\n\n');fullText=fullText?`${fullText}\n\n--- ARCHIVOS ADJUNTOS ---\n${attText}`:`--- ARCHIVOS ADJUNTOS ---\n${attText}`}if(fullText)contentParts.push({type:'text',text:fullText});imgAtts.forEach(att=>contentParts.push({type:'image_url',image_url:{url:`data:${att.mimeType};base64,${att.imageBase64}`}}));if(imgAtts.length>0&&!fullText)contentParts.unshift({type:'text',text:'Analizá este flujo o imagen y describí el proceso que muestra para ayudarme a documentarlo.'});return{role:'user',content:contentParts}}
 async function sendMessage(){if(isLoading)return;const input=document.getElementById('user-input'),text=input.value.trim();if(!text&&pendingAttachments.length===0)return;const apiKey=document.getElementById('api-key-input').value.trim();if(!apiKey){showError('Primero configurá tu API key de Groq en el panel izquierdo.');return}if(!selectedDocType){const firstBtn=document.querySelector('.doc-type-btn[data-type]');if(firstBtn){firstBtn.closest('.doc-types').style.outline='2px solid var(--accent)';firstBtn.closest('.doc-types').style.borderRadius='10px';setTimeout(()=>{firstBtn.closest('.doc-types').style.outline='';},2000);}showError('Elegí el tipo de documento antes de empezar.');return}
-const titleInp=document.getElementById('doc-title-input');if(!titleInp.value.trim()){titleInp.focus();titleInp.style.borderColor='#e05252';titleInp.placeholder='⚠️ Escribí el título antes de continuar';setTimeout(()=>{titleInp.style.borderColor='';titleInp.placeholder='Ej: Proceso de Ingreso de Mercadería'},2500);showError('Escribí el título del documento antes de empezar.');return}hideError();hideWelcome();const attachmentNames=pendingAttachments.map(a=>a.name);const userMsg=buildUserMessage(text);addMessage('user',text||'(archivo adjunto)',attachmentNames);input.value='';autoResize(input);pendingAttachments=[];renderAttachmentsStrip();conversationHistory.push(userMsg);const typingId=showTyping();isLoading=true;document.getElementById('send-btn').disabled=true;try{const reply=await callGroq(conversationHistory);conversationHistory.push({role:'assistant',content:reply});removeTyping(typingId);const docMarker=reply.includes('📄 DOCUMENTO GENERADO:');
+const titleInp=document.getElementById('doc-title-input');if(!titleInp.value.trim()){titleInp.focus();titleInp.style.borderColor='#e05252';titleInp.placeholder='⚠️ Escribí el título antes de continuar';setTimeout(()=>{titleInp.style.borderColor='';titleInp.placeholder='Ej: Proceso de Ingreso de Mercadería'},2500);showError('Escribí el título del documento antes de empezar.');return}hideError();hideWelcome();if(conversationHistory.length===0)lockSidebar();const attachmentNames=pendingAttachments.map(a=>a.name);const userMsg=buildUserMessage(text);addMessage('user',text||'(archivo adjunto)',attachmentNames);input.value='';autoResize(input);pendingAttachments=[];renderAttachmentsStrip();conversationHistory.push(userMsg);const typingId=showTyping();isLoading=true;document.getElementById('send-btn').disabled=true;try{const reply=await callGroq(conversationHistory);conversationHistory.push({role:'assistant',content:reply});removeTyping(typingId);const docMarker=reply.includes('📄 DOCUMENTO GENERADO:');
     const looksLikeDoc = reply.length > 600 && reply.includes('OBJETIVO') && reply.includes('ALCANCE') && reply.includes('ACTIVIDADES');
     if(docMarker || looksLikeDoc){const parts=docMarker ? reply.split('📄 DOCUMENTO GENERADO:') : ['', reply];
       const beforeDoc=parts[0].trim();
@@ -536,6 +537,67 @@ function hideWelcome(){const w=document.getElementById('welcome-screen');if(w)w.
 function showError(msg){const el=document.getElementById('error-notice');el.textContent='⚠️ '+msg;el.classList.add('show')}
 function hideError(){document.getElementById('error-notice').classList.remove('show')}
 function selectDocType(btn){document.querySelectorAll('.doc-type-btn[data-type]').forEach(b=>b.classList.remove('active'));btn.classList.add('active');selectedDocType=btn.dataset.type}
+function lockSidebar(){document.querySelectorAll('.doc-type-btn').forEach(b=>b.classList.add('locked'));}
+function unlockSidebar(){document.querySelectorAll('.doc-type-btn').forEach(b=>b.classList.remove('locked'));}
+
+function reorderDocSections(text, docType) {
+  const orders = {
+    proceso:       ['OBJETIVO','ALCANCE','RESPONSABLES','GLOSARIO','ACTIVIDADES','VALIDEZ','INDICADORES','DOCUMENTOS','ANEXO','HISTORIAL','APROBACI'],
+    procedimiento: ['OBJETIVO','ALCANCE','RESPONSABLES','GLOSARIO','ACTIVIDADES','VALIDEZ','INDICADORES','DOCUMENTOS','LINKS','HISTORIAL','APROBACI'],
+    instructivo:   ['OBJETIVO','ALCANCE','RESPONSABLES','GLOSARIO','ACTIVIDADES','INDICADORES','DOCUMENTOS','ANEXO','VALIDEZ','HISTORIAL','APROBACI']
+  };
+  const keywords = {
+    'OBJETIVO':    ['OBJETIVO'],
+    'ALCANCE':     ['ALCANCE'],
+    'RESPONSABLES':['RESPONSABLES'],
+    'GLOSARIO':    ['GLOSARIO'],
+    'ACTIVIDADES': ['ACTIVIDADES'],
+    'VALIDEZ':     ['VALIDEZ'],
+    'INDICADORES': ['INDICADORES'],
+    'DOCUMENTOS':  ['DOCUMENTOS'],
+    'ANEXO':       ['ANEXO'],
+    'LINKS':       ['LINKS','ÚTILES'],
+    'HISTORIAL':   ['HISTORIAL'],
+    'APROBACI':    ['APROBACI']
+  };
+  const lines = text.split('\n');
+  const starts = [];
+  for (let i = 0; i < lines.length; i++) {
+    const l = lines[i].trim();
+    if (/^\d+\.\s+[A-ZÁÉÍÓÚÑ]/.test(l) && !/^\d+\.\d+/.test(l)) starts.push(i);
+  }
+  if (starts.length === 0) return text;
+  const preamble = lines.slice(0, starts[0]);
+  const map = {};
+  for (let s = 0; s < starts.length; s++) {
+    const end = s + 1 < starts.length ? starts[s + 1] : lines.length;
+    const header = lines[starts[s]].trim();
+    const content = lines.slice(starts[s] + 1, end);
+    const up = header.toUpperCase();
+    let key = null;
+    for (const [k, kws] of Object.entries(keywords)) {
+      if (kws.some(kw => up.includes(kw))) { key = k; break; }
+    }
+    if (key && !map[key]) map[key] = { header, content };
+    else map[`_${s}`] = { header, content };
+  }
+  const order = orders[docType] || orders.proceso;
+  const result = [...preamble];
+  let n = 1;
+  for (const k of order) {
+    if (map[k]) {
+      result.push(map[k].header.replace(/^\d+\./, `${n}.`));
+      result.push(...map[k].content);
+      n++;
+      delete map[k];
+    }
+  }
+  // secciones no reconocidas al final
+  for (const k of Object.keys(map)) {
+    if (k.startsWith('_')) { result.push(map[k].header); result.push(...map[k].content); }
+  }
+  return result.join('\n');
+}
 function selectDocMode(mode){const prev=docMode;docMode=mode;document.getElementById('mode-new-btn').classList.toggle('active',mode==='new');document.getElementById('mode-update-btn').classList.toggle('active',mode==='update');const vi=document.getElementById('doc-version-input');const hint=document.getElementById('version-hint');if(mode==='new'){vi.disabled=true;vi.value='0';vi.style.cursor='not-allowed';lastDocVersion='00';hint.innerHTML='Documento nuevo · siempre versión 00. Vencimiento: <span id="expiry-display">—</span>';}else{vi.disabled=false;vi.value='';vi.style.cursor='text';vi.min='1';vi.placeholder='Ej: 1, 2, 3…';lastDocVersion='';hint.innerHTML='El agente lo detectará del doc. adjunto. Vencimiento: <span id="expiry-display">—</span>';}
 // Resetear conversación al cambiar de modo para que el agente arranque desde cero
 if(prev!==mode){conversationHistory=[];documentGenerated=false;lastGeneratedDoc='';docVersions=[];pendingAttachments=[];renderAttachmentsStrip();const chatArea=document.getElementById('chat-area');if(chatArea){chatArea.innerHTML=`<div class="welcome" id="welcome-screen"><div class="welcome-icon">🤖</div><h2>¿Qué proceso vamos a documentar?</h2><p>Subí archivos, grabá un audio o describí el proceso con tus palabras. Yo te hago preguntas y redacto el documento formal completo.</p><div class="welcome-steps"><div class="welcome-step"><div class="welcome-step-num">1</div> Configurá tu API key</div><div class="welcome-step"><div class="welcome-step-num">2</div> Elegí el tipo de doc</div><div class="welcome-step"><div class="welcome-step-num">3</div> 🎙️ Grabá o adjuntá archivos</div><div class="welcome-step"><div class="welcome-step-num">4</div> Chateá con el agente</div></div></div>`;}document.getElementById('new-doc-btn').style.display='none';hideError();}}
@@ -663,6 +725,9 @@ async function downloadDocx() {
       const vRe = new RegExp(`(\\|\\s*${lastDocVersion}\\s*\\|)\\s*DD/MMM/AAAA\\s*(\\|)`, 'g');
       lastGeneratedDoc = lastGeneratedDoc.replace(vRe, `$1 ${todayStr} $2`);
     }
+
+    // Reordenar secciones según el template del tipo de documento
+    lastGeneratedDoc = reorderDocSections(lastGeneratedDoc, selectedDocType);
 
     // Página ÍNDICE
     const sectionLines = lastGeneratedDoc.split('\n').filter(l => /^\d+\.\s+[A-ZÁÉÍÓÚÑ]/.test(l.trim()) && !/^\d+\.\d+/.test(l.trim()));
