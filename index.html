@@ -609,8 +609,14 @@ async function downloadDocx() {
       );
     }
 
+    // Reemplazar fecha de hoy en la fila de Creación del Historial de Revisiones
+    const todayD = new Date();
+    const todayMonths = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+    const todayStr = `${String(todayD.getDate()).padStart(2,'0')}/${todayMonths[todayD.getMonth()]}/${todayD.getFullYear()}`;
+    lastGeneratedDoc = lastGeneratedDoc.replace(/(\|\s*00\s*\|)\s*DD\/MMM\/AAAA\s*(\|\s*[Cc]reaci[oó]n)/g, `$1 ${todayStr} $2`);
+
     // Página ÍNDICE
-    const sectionLines = lastGeneratedDoc.split('\n').filter(l => /^\d+\.\s+[A-ZÁÉÍÓÚÑ]/.test(l.trim()));
+    const sectionLines = lastGeneratedDoc.split('\n').filter(l => /^\d+\.\s+[A-ZÁÉÍÓÚÑ]/.test(l.trim()) && !/^\d+\.\d+/.test(l.trim()));
     // Crear mapa de texto de sección → bookmarkId para hipervínculos internos
     const sectionBookmarkMap = new Map();
     sectionLines.forEach((s, i) => { sectionBookmarkMap.set(s.trim(), i); });
@@ -636,11 +642,10 @@ async function downloadDocx() {
       const raw = lines[idx]; const line = raw.trim(); idx++;
       if (!line) { body.push(new Paragraph({ spacing: { before: 40, after: 40 }, children: [new TextRun("")] })); continue; }
 
-      // Sección principal MAYÚSCULAS numerada o no
-      if (/^\d+\.\s+[A-ZÁÉÍÓÚÑ][A-ZÁÉÍÓÚÑ\s\(\)\/]{2,}$/.test(line) || /^[A-ZÁÉÍÓÚÑ][A-ZÁÉÍÓÚÑ\s\(\)\/]{4,}$/.test(line)) {
+      // Sección principal: número simple (1., 2., ... 11.) seguido de mayúscula — NO subsecciones (4.1, 4.2)
+      if (/^\d+\.\s+[A-ZÁÉÍÓÚÑ]/.test(line) && !/^\d+\.\d+/.test(line)) {
         const bmId = sectionBookmarkMap.has(line) ? sectionBookmarkMap.get(line) : null;
         body.push(new Paragraph({ heading: HeadingLevel.HEADING_1, spacing: { before: 400, after: 120 },
-          ...(bmId !== null ? { id: `heading-${bmId}` } : {}),
           children: bmId !== null ? [
             new BookmarkStart({ id: bmId, name: `heading-${bmId}` }),
             new TextRun({ text: line, font: FONT, size: 24, bold: true, color: TEAL }),
