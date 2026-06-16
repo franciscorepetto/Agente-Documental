@@ -156,15 +156,17 @@ body{font-family:'Montserrat',sans-serif;background:var(--bg);color:var(--ink);m
   <aside class="sidebar">
     <div>
       <div class="sidebar-section-title">Modalidad</div>
-      <div class="doc-types" style="flex-direction:row;gap:4px;margin-bottom:4px">
-        <button class="doc-type-btn active" id="mode-new-btn" onclick="selectDocMode('new')" style="flex:1;justify-content:center;padding:6px 4px">
-          <div class="doc-type-info"><div class="doc-type-name" style="font-size:11px;justify-content:center">✨ Nuevo</div></div>
-        </button>
-        <button class="doc-type-btn" id="mode-update-btn" onclick="selectDocMode('update')" style="flex:1;justify-content:center;padding:6px 4px">
-          <div class="doc-type-info"><div class="doc-type-name" style="font-size:11px;justify-content:center">🔄 Actualizar</div></div>
-        </button>
-        <button class="doc-type-btn" id="mode-consult-btn" onclick="selectDocMode('consult')" style="flex:1;justify-content:center;padding:6px 4px">
-          <div class="doc-type-info"><div class="doc-type-name" style="font-size:11px;justify-content:center">🔍 Consultar</div></div>
+      <div style="display:flex;flex-direction:column;gap:4px;margin-bottom:4px">
+        <div style="display:flex;gap:4px">
+          <button class="doc-type-btn active" id="mode-new-btn" onclick="selectDocMode('new')" style="flex:1;justify-content:center;padding:6px 4px">
+            <div class="doc-type-info"><div class="doc-type-name" style="font-size:11px;justify-content:center">✨ Nuevo</div></div>
+          </button>
+          <button class="doc-type-btn" id="mode-update-btn" onclick="selectDocMode('update')" style="flex:1;justify-content:center;padding:6px 4px">
+            <div class="doc-type-info"><div class="doc-type-name" style="font-size:11px;justify-content:center">🔄 Actualizar</div></div>
+          </button>
+        </div>
+        <button class="doc-type-btn" id="mode-consult-btn" onclick="selectDocMode('consult')" style="width:100%;justify-content:center;padding:6px 4px">
+          <div class="doc-type-info"><div class="doc-type-name" style="font-size:11px;justify-content:center">🔍 Consultar repositorio</div></div>
         </button>
       </div>
       <div id="doc-type-section"><div class="sidebar-section-title" style="margin-top:8px">Tipo de documento</div>
