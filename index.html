@@ -201,39 +201,45 @@ body{font-family:'Montserrat',sans-serif;background:var(--bg);color:var(--ink);m
       <div class="sidebar-section-title">Título del documento</div>
       <div class="title-input-wrap">
         <input type="text" id="doc-title-input" class="doc-title-input" placeholder="Ej: Proceso de Ingreso de Mercadería" oninput="updateDocTitle(this.value)" maxlength="80">
+        <div class="title-hint">El nombre exacto que aparecerá en el documento</div>
       </div>
     </div>
     <div>
-      <div class="sidebar-section-title">Área y N°</div>
-      <div style="display:flex;gap:8px">
-        <div class="title-input-wrap" style="flex:0 0 60%">
-          <select id="doc-area-input" class="doc-title-input" onchange="updateDocArea(this.value)">
-            <option value="">— Área —</option>
-            <option value="MC">MC · Mejora Continua</option>
-            <option value="OPS">OPS · Operaciones</option>
-            <option value="CX">CX · Customer Experience</option>
-          </select>
-        </div>
-        <div class="title-input-wrap" style="flex:1">
-          <input type="number" id="doc-number-input" class="doc-title-input" min="1" max="9999" placeholder="N°" oninput="updateDocNumber(this.value)">
-        </div>
+      <div class="sidebar-section-title">Área responsable</div>
+      <div class="title-input-wrap">
+        <select id="doc-area-input" class="doc-title-input" onchange="updateDocArea(this.value)">
+          <option value="">— Seleccioná un área —</option>
+          <option value="MC">MC · Mejora Continua</option>
+          <option value="OPS">OPS · Operaciones</option>
+          <option value="CX">CX · Customer Experience</option>
+        </select>
+        <div class="title-hint">Área dueña del documento</div>
+      </div>
+    </div>
+    <div>
+      <div class="sidebar-section-title">Número de documento</div>
+      <div class="title-input-wrap">
+        <input type="number" id="doc-number-input" class="doc-title-input" min="1" max="9999" placeholder="Ej: 1" oninput="updateDocNumber(this.value)">
+        <div class="title-hint">Se formateará como 4 dígitos (0001, 0002…)</div>
       </div>
     </div>
     <div>
       <div class="sidebar-section-title">Código generado</div>
       <div class="title-input-wrap">
         <div id="doc-code-display" class="doc-code-preview">—</div>
+        <div class="title-hint">Se construye automáticamente con los campos anteriores</div>
       </div>
     </div>
     <div>
       <div class="sidebar-section-title">Versión</div>
       <div class="title-input-wrap">
         <input type="number" id="doc-version-input" class="doc-title-input" min="0" placeholder="—" oninput="updateDocVersion(this.value)" style="cursor:not-allowed" disabled value="0">
-        <div class="title-hint" id="version-hint">Vencimiento: <span id="expiry-display">—</span></div>
+        <div class="title-hint" id="version-hint">Documento nuevo · siempre versión 00. Vencimiento: <span id="expiry-display">—</span></div>
       </div>
     </div>
     <div>
-<div class="title-input-wrap">
+      <div class="sidebar-section-title">Redactor del documento</div>
+      <div class="title-input-wrap">
         <input type="text" id="doc-author-name" class="doc-title-input" placeholder="Nombre completo" oninput="updateAuthorName(this.value)" maxlength="60">
         <input type="text" id="doc-author-position" class="doc-title-input" placeholder="Cargo / Posición" oninput="updateAuthorPosition(this.value)" maxlength="60" style="margin-top:4px">
       </div>
