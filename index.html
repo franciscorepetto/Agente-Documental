@@ -716,12 +716,6 @@ async function downloadDocx() {
       new Paragraph({
         children: [new TextRun({ text: 'Vencimiento ('+footerExpiry+')', font: FONT, size: 14, color: GRAY2 })]
       }),
-      new Paragraph({
-        spacing: { before: 120, after: 0, line: 640, lineRule: "exact" },
-        indent: { left: -1134, right: -1134 },
-        shading: { fill: "1DB4C2", type: ShadingType.CLEAR },
-        children: [new TextRun({ text: " ", font: FONT, size: 48, color: "1DB4C2" })]
-      })
     ] });
 
     // PORTADA
