@@ -134,6 +134,8 @@ body{font-family:'Montserrat',sans-serif;background:var(--bg);color:var(--ink);m
 ::-webkit-scrollbar-thumb:hover{background:var(--ink3)}
 .error-notice{background:var(--red-bg);border:1px solid #E8BFB5;border-radius:var(--radius-sm);padding:10px 14px;font-size:12px;color:var(--red);display:none}
 .error-notice.show{display:block}
+.warning-notice{background:#FFF8E1;border:1px solid #FFD54F;border-radius:var(--radius-sm);padding:10px 14px;font-size:12px;color:#E65100;display:none;margin-top:6px}
+.warning-notice.show{display:block}
 .record-banner{display:none;align-items:center;gap:8px;margin-bottom:10px;background:var(--red-bg);border:1px solid #E8BFB5;border-radius:8px;padding:7px 12px;font-size:12px;color:var(--red);font-weight:500}
 .record-banner.show{display:flex}
 .record-dot{width:8px;height:8px;border-radius:50%;background:var(--red);animation:pulse-anim 1s infinite;flex-shrink:0}
@@ -199,45 +201,39 @@ body{font-family:'Montserrat',sans-serif;background:var(--bg);color:var(--ink);m
       <div class="sidebar-section-title">Título del documento</div>
       <div class="title-input-wrap">
         <input type="text" id="doc-title-input" class="doc-title-input" placeholder="Ej: Proceso de Ingreso de Mercadería" oninput="updateDocTitle(this.value)" maxlength="80">
-        <div class="title-hint">El nombre exacto que aparecerá en el documento</div>
       </div>
     </div>
     <div>
-      <div class="sidebar-section-title">Área responsable</div>
-      <div class="title-input-wrap">
-        <select id="doc-area-input" class="doc-title-input" onchange="updateDocArea(this.value)">
-          <option value="">— Seleccioná un área —</option>
-          <option value="MC">MC · Mejora Continua</option>
-          <option value="OPS">OPS · Operaciones</option>
-          <option value="CX">CX · Customer Experience</option>
-        </select>
-        <div class="title-hint">Área dueña del documento</div>
-      </div>
-    </div>
-    <div>
-      <div class="sidebar-section-title">Número de documento</div>
-      <div class="title-input-wrap">
-        <input type="number" id="doc-number-input" class="doc-title-input" min="1" max="9999" placeholder="Ej: 1" oninput="updateDocNumber(this.value)">
-        <div class="title-hint">Se formateará como 4 dígitos (0001, 0002…)</div>
+      <div class="sidebar-section-title">Área y N°</div>
+      <div style="display:flex;gap:8px">
+        <div class="title-input-wrap" style="flex:0 0 60%">
+          <select id="doc-area-input" class="doc-title-input" onchange="updateDocArea(this.value)">
+            <option value="">— Área —</option>
+            <option value="MC">MC · Mejora Continua</option>
+            <option value="OPS">OPS · Operaciones</option>
+            <option value="CX">CX · Customer Experience</option>
+          </select>
+        </div>
+        <div class="title-input-wrap" style="flex:1">
+          <input type="number" id="doc-number-input" class="doc-title-input" min="1" max="9999" placeholder="N°" oninput="updateDocNumber(this.value)">
+        </div>
       </div>
     </div>
     <div>
       <div class="sidebar-section-title">Código generado</div>
       <div class="title-input-wrap">
         <div id="doc-code-display" class="doc-code-preview">—</div>
-        <div class="title-hint">Se construye automáticamente con los campos anteriores</div>
       </div>
     </div>
     <div>
       <div class="sidebar-section-title">Versión</div>
       <div class="title-input-wrap">
         <input type="number" id="doc-version-input" class="doc-title-input" min="0" placeholder="—" oninput="updateDocVersion(this.value)" style="cursor:not-allowed" disabled value="0">
-        <div class="title-hint" id="version-hint">Documento nuevo · siempre versión 00. Vencimiento: <span id="expiry-display">—</span></div>
+        <div class="title-hint" id="version-hint">Vencimiento: <span id="expiry-display">—</span></div>
       </div>
     </div>
     <div>
-      <div class="sidebar-section-title">Redactor del documento</div>
-      <div class="title-input-wrap">
+<div class="title-input-wrap">
         <input type="text" id="doc-author-name" class="doc-title-input" placeholder="Nombre completo" oninput="updateAuthorName(this.value)" maxlength="60">
         <input type="text" id="doc-author-position" class="doc-title-input" placeholder="Cargo / Posición" oninput="updateAuthorPosition(this.value)" maxlength="60" style="margin-top:4px">
       </div>
@@ -256,22 +252,8 @@ body{font-family:'Montserrat',sans-serif;background:var(--bg);color:var(--ink);m
         </div>
         <div class="api-hint">Conseguí tu clave gratis en <a href="https://console.groq.com/keys" target="_blank">console.groq.com</a>. Se guarda solo en esta pestaña.</div>
         <div class="error-notice" id="error-notice"></div>
+        <div class="warning-notice" id="warning-notice"></div>
       </div>
-    </div>
-    <div>
-      <div class="sidebar-section-title">Cómo usar</div>
-      <div class="instructions">
-        <div class="instructions-title">💡 Pasos</div>
-        <ol>
-          <li>Pegá tu API key de Groq arriba</li>
-          <li>Elegí el tipo de documento</li>
-          <li>Subí archivos o grabá un audio 🎙️</li>
-          <li>Respondé las preguntas del agente</li>
-          <li>Descargá el documento generado</li>
-        </ol>
-      </div>
-    </div>
-    <div>
     </div>
   </aside>
   <main class="main">
@@ -521,7 +503,7 @@ function handleDragLeave(e){e.preventDefault();e.stopPropagation();if(!document.
 async function handleDrop(e){e.preventDefault();e.stopPropagation();document.getElementById('chat-area').classList.remove('drag-over');const files=Array.from(e.dataTransfer.files);for(const file of files){addProcessingTag(file.name);try{const att=await processFile(file);removeProcessingTags();addAttachment(att)}catch(err){removeProcessingTags();showError(`Error procesando "${file.name}": ${err.message}`)}}}
 async function processFile(file){const name=file.name,ext=name.split('.').pop().toLowerCase();
 if(['mp3','wav','m4a','webm','ogg','flac'].includes(ext)){const text=await transcribeAudio(file,name);return{type:'audio',name,content:`[Transcripción de audio: ${name}]\n${text}`}}
-if(ext==='pdf'){const text=await extractPdfText(file);return{type:'pdf',name,content:`[Contenido del PDF: ${name}]\n${text}`}}
+if(ext==='pdf'){const text=await extractPdfText(file);if(text.length<50)showWarning('Este PDF parece ser una imagen escaneada — el agente no podrá leer su contenido. Convertí las páginas a imágenes (PNG/JPG) y adjuntalas para que funcione correctamente.');return{type:'pdf',name,content:`[Contenido del PDF: ${name}]\n${text}`}}
 if(ext==='docx'){const text=await extractDocxText(file);return{type:'docx',name,content:`[Contenido del Word: ${name}]\n${text}`}}
 if(ext==='pptx'){const text=await extractPptxText(file);return{type:'pptx',name,content:`[Contenido del PowerPoint: ${name}]\n${text}`}}
 if(['png','jpg','jpeg','gif','webp'].includes(ext)){const base64=await fileToBase64(file);return{type:'image',name,content:`[Imagen: ${name}]`,imageBase64:base64,mimeType:file.type||'image/png'}}
@@ -568,6 +550,7 @@ function scrollToBottom(){const c=document.getElementById('chat-area');c.scrollT
 function hideWelcome(){const w=document.getElementById('welcome-screen');if(w)w.remove()}
 function showError(msg){const el=document.getElementById('error-notice');el.textContent='⚠️ '+msg;el.classList.add('show')}
 function hideError(){document.getElementById('error-notice').classList.remove('show')}
+function showWarning(msg){const el=document.getElementById('warning-notice');el.innerHTML='⚠️ '+msg;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),10000)}
 function selectDocType(btn){document.querySelectorAll('.doc-type-btn[data-type]').forEach(b=>b.classList.remove('active'));btn.classList.add('active');selectedDocType=btn.dataset.type;buildDocCode();}
 function lockSidebar(){document.querySelectorAll('.doc-type-btn').forEach(b=>b.classList.add('locked'));}
 function unlockSidebar(){document.querySelectorAll('.doc-type-btn').forEach(b=>b.classList.remove('locked'));}
