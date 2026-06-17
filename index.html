@@ -696,9 +696,8 @@ async function downloadDocx() {
               children: [new ImageRun({ data: logoBytes, type: 'png', transformation: { width: 105, height: 22 } })] })] }),
           new TableCell({ width: { size: 7260, type: WidthType.DXA }, borders: noBorders,
             verticalAlign: VerticalAlign.CENTER, margins: { top: 80, bottom: 80, left: 160, right: 80 },
-            children: [new Paragraph({ children: [
-              new TextRun({ text: prefix + ' ', font: FONT, size: 18, bold: false, color: GRAY2 }),
-              new TextRun({ text: docName, font: FONT, size: 18, bold: true, color: BLACK })
+            children: [new Paragraph({ alignment: AlignmentType.RIGHT, children: [
+              new TextRun({ text: docName.toUpperCase(), font: FONT, size: 18, bold: false, color: GRAY2 })
             ] })] })
         ] })]
       })
@@ -716,6 +715,11 @@ async function downloadDocx() {
       }),
       new Paragraph({
         children: [new TextRun({ text: 'Vencimiento ('+footerExpiry+')', font: FONT, size: 14, color: GRAY2 })]
+      }),
+      new Paragraph({
+        spacing: { before: 100, after: 0, line: 480, lineRule: "exact" },
+        shading: { fill: "1DB4C2", type: ShadingType.CLEAR },
+        children: [new TextRun({ text: " ", font: FONT, size: 32, color: "1DB4C2" })]
       })
     ] });
 
@@ -723,10 +727,10 @@ async function downloadDocx() {
     const cover = [
       new Paragraph({ spacing: { before: 2800 }, children: [new TextRun("")] }),
       new Paragraph({ alignment: AlignmentType.CENTER, spacing: { before: 160, after: 160 },
-        border: { top: { style: BorderStyle.SINGLE, size: 4, color: TEAL, space: 8 },
-                   bottom: { style: BorderStyle.SINGLE, size: 4, color: TEAL, space: 8 },
-                   left: { style: BorderStyle.SINGLE, size: 4, color: TEAL, space: 8 },
-                   right: { style: BorderStyle.SINGLE, size: 4, color: TEAL, space: 8 } },
+        border: { top: { style: BorderStyle.SINGLE, size: 14, color: TEAL, space: 10 },
+                   bottom: { style: BorderStyle.SINGLE, size: 14, color: TEAL, space: 10 },
+                   left: { style: BorderStyle.SINGLE, size: 14, color: TEAL, space: 10 },
+                   right: { style: BorderStyle.SINGLE, size: 14, color: TEAL, space: 10 } },
         children: [new TextRun({ text: docName, font: FONT, size: 44, bold: false, color: BLACK })] }),
       new Paragraph({ alignment: AlignmentType.CENTER, spacing: { before: 400, after: 0 },
         children: [new ImageRun({ data: logoBytes, type: 'png', transformation: { width: 200, height: 42 } })] }),
@@ -771,7 +775,7 @@ async function downloadDocx() {
     const sectionLines = lastGeneratedDoc.split('\n').filter(l => /^\d+\.\s+[A-ZÁÉÍÓÚÑ]/.test(l.trim()) && !/^\d+\.\d+/.test(l.trim()));
     // Crear mapa de texto de sección → bookmarkId para hipervínculos internos
     const sectionBookmarkMap = new Map();
-    sectionLines.forEach((s, i) => { sectionBookmarkMap.set(s.trim(), i); });
+    sectionLines.forEach((s, i) => { sectionBookmarkMap.set(s.trim().replace(/\s+/g,' '), i + 1); });
     const indexPage = [
       new Paragraph({ spacing: { before: 200, after: 300 },
         children: [new TextRun({ text: 'ÍNDICE', font: FONT, size: 24, bold: true, color: BLACK })] }),
@@ -779,7 +783,7 @@ async function downloadDocx() {
         spacing: { before: 80, after: 80 },
         children: [
           new InternalHyperlink({
-            anchor: `heading-${i}`,
+            anchor: `heading-${i + 1}`,
             children: [new TextRun({ text: s.trim(), font: FONT, size: 20, color: "1DB4C2", underline: {} })]
           })
         ]
@@ -796,7 +800,8 @@ async function downloadDocx() {
 
       // Sección principal: número simple (1., 2., ... 11.) seguido de mayúscula — NO subsecciones (4.1, 4.2)
       if (/^\d+\.\s+[A-ZÁÉÍÓÚÑ]/.test(line) && !/^\d+\.\d+/.test(line)) {
-        const bmId = sectionBookmarkMap.has(line) ? sectionBookmarkMap.get(line) : null;
+        const normLine = line.replace(/\s+/g,' ');
+        const bmId = sectionBookmarkMap.has(normLine) ? sectionBookmarkMap.get(normLine) : null;
         body.push(new Paragraph({ heading: HeadingLevel.HEADING_1, spacing: { before: 400, after: 120 },
           children: bmId !== null ? [
             new BookmarkStart({ id: bmId, name: `heading-${bmId}` }),
