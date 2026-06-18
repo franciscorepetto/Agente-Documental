@@ -762,35 +762,11 @@ async function downloadDocx() {
     // Reordenar secciones según el template del tipo de documento
     lastGeneratedDoc = reorderDocSections(lastGeneratedDoc, selectedDocType);
 
-    // Página ÍNDICE — lista de secciones con hipervínculos a bookmarks, en orden del documento
-    const allIndexLines = lastGeneratedDoc.split('\n').filter(l => {
-      const t = l.trim();
-      return (/^\d+\.\s+[A-ZÁÉÍÓÚÑ]/.test(t) && !/^\d+\.\d+/.test(t)) || /^\d+\.\d+\.?\s+/.test(t);
-    });
-    const bmBase = 100;
-    let bmCounter = bmBase;
-    const lineBookmarkMap = new Map(); // normalized line -> { id, type }
-    allIndexLines.forEach(l => {
-      const norm = l.trim().replace(/\s+/g,' ');
-      lineBookmarkMap.set(norm, { id: bmCounter++, isSection: /^\d+\.\s+[A-ZÁÉÍÓÚÑ]/.test(norm) && !/^\d+\.\d+/.test(norm) });
-    });
+    // Página ÍNDICE — TOC nativo de Word con estilos personalizados (sin números de página)
     const indexPage = [
-      new Paragraph({ spacing: { before: 200, after: 160 },
-        children: [new TextRun({ text: 'ÍNDICE', font: FONT, size: 24, bold: true, color: BLACK })] }),
-      new Paragraph({ spacing: { before: 0, after: 240 },
-        children: [new TextRun({ text: 'Ctrl+Clic sobre un título para ir a esa sección', font: FONT, size: 16, color: GRAY2, italics: true })] }),
-      ...allIndexLines.map(s => {
-        const norm = s.trim().replace(/\s+/g,' ');
-        const bm = lineBookmarkMap.get(norm);
-        const isSection = bm?.isSection;
-        return new Paragraph({
-          spacing: { before: isSection ? 100 : 60, after: isSection ? 60 : 40 },
-          indent: isSection ? {} : { left: 400 },
-          children: [new InternalHyperlink({
-            anchor: `bm-${bm.id}`,
-            children: [new TextRun({ text: s.trim(), font: FONT, size: isSection ? 20 : 18, bold: isSection, color: TEAL })]
-          })]
-        });
+      new TableOfContents("ÍNDICE", {
+        hyperlink: true,
+        headingStyleRange: "1-2",
       }),
       new Paragraph({ children: [new PageBreak()] })
     ];
@@ -804,26 +780,14 @@ async function downloadDocx() {
 
       // Sección principal: número simple (1., 2., ... 11.) seguido de mayúscula — NO subsecciones (4.1, 4.2)
       if (/^\d+\.\s+[A-ZÁÉÍÓÚÑ]/.test(line) && !/^\d+\.\d+/.test(line)) {
-        const normLine = line.replace(/\s+/g,' ');
-        const bm = lineBookmarkMap.get(normLine);
         body.push(new Paragraph({ heading: HeadingLevel.HEADING_1, spacing: { before: 400, after: 120 },
-          children: bm ? [
-            new BookmarkStart({ id: bm.id, name: `bm-${bm.id}` }),
-            new TextRun({ text: line, font: FONT, size: 24, bold: true, color: TEAL }),
-            new BookmarkEnd({ id: bm.id })
-          ] : [new TextRun({ text: line, font: FONT, size: 24, bold: true, color: TEAL })] }));
+          children: [new TextRun({ text: line, font: FONT, size: 24, bold: true, color: TEAL })] }));
         continue;
       }
       // Subsección numerada (5.1., 5.2., etc.) — Heading 2
       if (/^\d+\.\d+\.?\s+/.test(line)) {
-        const normLine = line.replace(/\s+/g,' ');
-        const bm = lineBookmarkMap.get(normLine);
         body.push(new Paragraph({ heading: HeadingLevel.HEADING_2, spacing: { before: 240, after: 80 },
-          children: bm ? [
-            new BookmarkStart({ id: bm.id, name: `bm-${bm.id}` }),
-            new TextRun({ text: line, font: FONT, size: 22, bold: true, color: BLACK }),
-            new BookmarkEnd({ id: bm.id })
-          ] : [new TextRun({ text: line, font: FONT, size: 22, bold: true, color: BLACK })] }));
+          children: [new TextRun({ text: line, font: FONT, size: 22, bold: true, color: BLACK })] }));
         continue;
       }
       // Subsección con ##
@@ -911,7 +875,13 @@ async function downloadDocx() {
              paragraph: { spacing: { before: 400, after: 120 }, outlineLevel: 0 } },
           { id: "Heading2", name: "Heading 2", basedOn: "Normal", next: "Normal", quickFormat: true,
              run: { size: 22, bold: true, font: FONT, color: BLACK },
-             paragraph: { spacing: { before: 240, after: 80 }, outlineLevel: 1 } }
+             paragraph: { spacing: { before: 240, after: 80 }, outlineLevel: 1 } },
+          { id: "TOC1", name: "TOC 1", basedOn: "Normal", next: "Normal",
+             run: { size: 20, bold: true, font: FONT, color: TEAL },
+             paragraph: { spacing: { before: 100, after: 60 }, tabStops: [] } },
+          { id: "TOC2", name: "TOC 2", basedOn: "Normal", next: "Normal",
+             run: { size: 18, font: FONT, color: TEAL },
+             paragraph: { spacing: { before: 60, after: 40 }, indent: { left: 400 }, tabStops: [] } }
         ]
       },
       sections: [{
