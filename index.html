@@ -481,7 +481,7 @@ FASE 3 — GENERACIÓN:
 - PROFUNDIDAD OBLIGATORIA: en la sección ACTIVIDADES, respetá EXACTAMENTE la estructura jerárquica que el usuario describió durante la entrevista. Si mencionó subsecciones 4.1, 4.2, 4.3 etc., generá CADA UNA como una sección ### separada con su propio párrafo introductorio, sus roles y sus bullets. Nunca colapses múltiples subsecciones en una sola. El número de subsecciones del documento debe coincidir con el número de etapas o pasos principales que describió el usuario.
 - SUBSECCIONES NUMERADAS: usá el mismo número que mencionó el usuario (4.1, 4.2, 4.5.1, 4.5.2, etc.). Si el usuario describió sub-subsecciones, generá sub-subsecciones. La profundidad del documento debe reflejar exactamente la profundidad que describió el usuario.
 - Si algo no se sabe: "A definir" o "N/A". Nunca dejés secciones vacías.
-- Siempre en español rioplatense (vos, hacé, registrá, validá, etc.).
+- Siempre en español rioplatense (vos, hacé, registrá, validá, etc.). Usá siempre tildes/acentos correctos (á, é, í, ó, ú, ñ) — NUNCA omitas acentos.
 
 REGLAS GENERALES:
 - Si el usuario pide generar ya aunque falten pasos, podés hacerlo pero advertí qué secciones quedaron incompletas.
@@ -722,7 +722,7 @@ async function downloadDocx() {
                    bottom: { style: BorderStyle.SINGLE, size: 14, color: TEAL, space: 10 },
                    left: { style: BorderStyle.SINGLE, size: 14, color: TEAL, space: 10 },
                    right: { style: BorderStyle.SINGLE, size: 14, color: TEAL, space: 10 } },
-        children: [new TextRun({ text: docName, font: FONT, size: 44, bold: false, color: BLACK })] }),
+        children: [new TextRun({ text: docName.toUpperCase(), font: FONT, size: 44, bold: false, color: BLACK })] }),
       new Paragraph({ alignment: AlignmentType.CENTER, spacing: { before: 400, after: 0 },
         children: [new ImageRun({ data: logoBytes, type: 'png', transformation: { width: 200, height: 42 } })] }),
       new Paragraph({ children: [new PageBreak()] })
@@ -867,6 +867,7 @@ async function downloadDocx() {
 
     const doc = new Document({
       numbering,
+      features: { updateFields: true },
       styles: {
         default: { document: { run: { font: FONT, size: 20, color: BLACK } } },
         paragraphStyles: [
