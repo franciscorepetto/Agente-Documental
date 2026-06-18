@@ -867,7 +867,7 @@ async function downloadDocx() {
 
     const doc = new Document({
       numbering,
-      features: { updateFields: true },
+      settings: { updateFields: true },
       styles: {
         default: { document: { run: { font: FONT, size: 20, color: BLACK } } },
         paragraphStyles: [
