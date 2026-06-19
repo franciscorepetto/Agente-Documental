@@ -806,8 +806,7 @@ async function downloadDocx() {
       // Nota
       if (/^(Nota de Control|Control Crítico|NOTA)/i.test(line)) {
         body.push(new Paragraph({ spacing: { before: 160, after: 80 },
-          shading: { fill: "E8F4F0", type: ShadingType.CLEAR },
-          children: [new TextRun({ text: line, font: FONT, size: 20, bold: true, color: "2A7A62" })] }));
+          children: [new TextRun({ text: line, font: FONT, size: 20, bold: true, color: BLACK })] }));
         continue;
       }
       // Tabla — detecta formato con o sin pipes al inicio/fin
