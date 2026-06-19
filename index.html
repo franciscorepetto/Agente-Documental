@@ -804,12 +804,7 @@ async function downloadDocx() {
         continue;
       }
       // Nota
-      if (/^(Nota de Control|Control Crítico|NOTA)/i.test(line)) {
-        body.push(new Paragraph({ spacing: { before: 160, after: 80 },
-          shading: { fill: "E8F4F0", type: ShadingType.CLEAR },
-          children: [new TextRun({ text: line, font: FONT, size: 20, bold: true, color: "2A7A62" })] }));
-        continue;
-      }
+      if (/^(Nota de Control|Control Crítico|NOTA)/i.test(line)) { continue; }
       // Tabla — detecta formato con o sin pipes al inicio/fin
       const isTableLine = (l) => (l.startsWith('|') && l.endsWith('|')) || (l.includes(' | ') && l.split('|').length >= 3);
       if (isTableLine(line)) {
