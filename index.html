@@ -893,6 +893,7 @@ async function downloadDocx() {
     a.href = url;
     a.download = prefix + '-' + docName.slice(0,30).replace(/[^a-zA-Z0-9áéíóúñÁÉÍÓÚÑ\s]/g,'-').trim() + '-' + new Date().toISOString().slice(0,10) + '.docx';
     a.click(); URL.revokeObjectURL(url);
+    showWarning('Word descargado. Para actualizar los números de página del índice: abrí el archivo, hacé clic derecho sobre el índice → "Actualizar campo" → "Actualizar toda la tabla".');
 
   } catch(err) {
     showError('Error al generar Word: ' + err.message); console.error(err);
