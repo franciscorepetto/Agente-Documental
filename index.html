@@ -905,7 +905,7 @@ async function downloadDocx() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = prefix + '-' + docName.slice(0,30).replace(/[^a-zA-Z0-9áéíóúñÁÉÍÓÚÑ\s]/g,'-').trim() + '-' + new Date().toISOString().slice(0,10) + '.docx';
+    const dt2=docTypeInfo[selectedDocType];const typeCode2=dt2?dt2.code:'DOC';const areaCode2=lastDocArea||'AREA';const numStr2=lastDocNumber?String(lastDocNumber).padStart(4,'0'):'0000';const verStr2=lastDocVersion?'v'+lastDocVersion:'v00';const safeTitle=docName.replace(/[/\\:*?"<>|]/g,'-').trim();a.download=`${safeTitle} (${typeCode2} - ${areaCode2} - ${numStr2}).${verStr2}.docx`;
     a.click(); URL.revokeObjectURL(url);
     showWarning('Word descargado. Para actualizar los números de página del índice: abrí el archivo, hacé clic derecho sobre el índice → "Actualizar campo" → "Actualizar toda la tabla".');
 
