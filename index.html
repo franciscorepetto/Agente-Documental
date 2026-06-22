@@ -139,7 +139,6 @@ body{font-family:'Montserrat',sans-serif;background:var(--bg);color:var(--ink);m
 .record-banner{display:none;align-items:center;gap:8px;margin-bottom:10px;background:var(--red-bg);border:1px solid #E8BFB5;border-radius:8px;padding:7px 12px;font-size:12px;color:var(--red);font-weight:500}
 .record-banner.show{display:flex}
 .record-dot{width:8px;height:8px;border-radius:50%;background:var(--red);animation:pulse-anim 1s infinite;flex-shrink:0}
-.consult-mode-hidden{display:none!important}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/docx@9.6.1/dist/index.iife.js"></script>
 </head>
@@ -158,18 +157,13 @@ body{font-family:'Montserrat',sans-serif;background:var(--bg);color:var(--ink);m
   <aside class="sidebar">
     <div>
       <div class="sidebar-section-title">Modalidad</div>
-      <div style="display:flex;flex-direction:column;gap:4px;margin-bottom:4px">
-        <div style="display:flex;gap:4px">
+      <div style="display:flex;gap:4px;margin-bottom:4px">
           <button class="doc-type-btn active" id="mode-new-btn" onclick="selectDocMode('new')" style="flex:1;justify-content:center;padding:6px 4px">
             <div class="doc-type-info"><div class="doc-type-name" style="font-size:11px;justify-content:center">✨ Nuevo</div></div>
           </button>
           <button class="doc-type-btn" id="mode-update-btn" onclick="selectDocMode('update')" style="flex:1;justify-content:center;padding:6px 4px">
             <div class="doc-type-info"><div class="doc-type-name" style="font-size:11px;justify-content:center">🔄 Actualizar</div></div>
           </button>
-        </div>
-        <button class="doc-type-btn" id="mode-consult-btn" onclick="selectDocMode('consult')" style="width:100%;justify-content:center;padding:6px 4px">
-          <div class="doc-type-info"><div class="doc-type-name" style="font-size:11px;justify-content:center">🔍 Consultar repositorio</div></div>
-        </button>
       </div>
       <div id="doc-type-section"><div class="sidebar-section-title" style="margin-top:8px">Tipo de documento</div>
       <div class="doc-types">
@@ -633,12 +627,9 @@ function reorderDocSections(text, docType) {
   }
   return result.join('\n');
 }
-function selectDocMode(mode){const prev=docMode;docMode=mode;document.getElementById('mode-new-btn').classList.toggle('active',mode==='new');document.getElementById('mode-update-btn').classList.toggle('active',mode==='update');document.getElementById('mode-consult-btn').classList.toggle('active',mode==='consult');const vi=document.getElementById('doc-version-input');const hint=document.getElementById('version-hint');
-// Show/hide doc-type and doc-meta sections
-const docTypeSection=document.getElementById('doc-type-section');const docMetaSection=document.getElementById('doc-meta-section');if(mode==='consult'){if(docTypeSection)docTypeSection.classList.add('consult-mode-hidden');if(docMetaSection)docMetaSection.classList.add('consult-mode-hidden');document.getElementById('user-input').placeholder='Ej: ¿Se puede pintar el piso de amarillo en el warehouse?';}else{if(docTypeSection)docTypeSection.classList.remove('consult-mode-hidden');if(docMetaSection)docMetaSection.classList.remove('consult-mode-hidden');document.getElementById('user-input').placeholder='Describí el proceso, grabá un audio o subí un archivo...';}
-if(mode==='new'){vi.disabled=true;vi.value='0';vi.style.cursor='not-allowed';lastDocVersion='00';hint.innerHTML='Documento nuevo · siempre versión 00. Vencimiento: <span id="expiry-display">—</span>';}else if(mode!=='consult'){vi.disabled=false;vi.value='';vi.style.cursor='text';vi.min='1';vi.placeholder='Ej: 1, 2, 3…';lastDocVersion='';hint.innerHTML='El agente lo detectará del doc. adjunto. Vencimiento: <span id="expiry-display">—</span>';}
-// Resetear conversación al cambiar de modo para que el agente arranque desde cero
-if(prev!==mode){conversationHistory=[];documentGenerated=false;lastGeneratedDoc='';docVersions=[];pendingAttachments=[];renderAttachmentsStrip();const chatArea=document.getElementById('chat-area');if(chatArea){if(mode==='consult'){chatArea.innerHTML=`<div class="welcome" id="welcome-screen"><div class="welcome-icon">🔍</div><h2>Consultá el repositorio documental</h2><p>Hacé cualquier pregunta y el agente busca la respuesta en los documentos publicados.</p></div>`;}else{chatArea.innerHTML=`<div class="welcome" id="welcome-screen"><div class="welcome-icon">🤖</div><h2>¿Qué proceso vamos a documentar?</h2><p>Subí archivos, grabá un audio o describí el proceso con tus palabras. Yo te hago preguntas y redacto el documento formal completo.</p><div class="welcome-steps"><div class="welcome-step"><div class="welcome-step-num">1</div> Configurá tu API key</div><div class="welcome-step"><div class="welcome-step-num">2</div> Elegí el tipo de doc</div><div class="welcome-step"><div class="welcome-step-num">3</div> 🎙️ Grabá o adjuntá archivos</div><div class="welcome-step"><div class="welcome-step-num">4</div> Chateá con el agente</div></div></div>`;}}document.getElementById('new-doc-btn').style.display='none';hideError();}}
+function selectDocMode(mode){const prev=docMode;docMode=mode;document.getElementById('mode-new-btn').classList.toggle('active',mode==='new');document.getElementById('mode-update-btn').classList.toggle('active',mode==='update');const vi=document.getElementById('doc-version-input');const hint=document.getElementById('version-hint');
+if(mode==='new'){vi.disabled=true;vi.value='0';vi.style.cursor='not-allowed';lastDocVersion='00';hint.innerHTML='Documento nuevo · siempre versión 00. Vencimiento: <span id="expiry-display">—</span>';}else{vi.disabled=false;vi.value='';vi.style.cursor='text';vi.min='1';vi.placeholder='Ej: 1, 2, 3…';lastDocVersion='';hint.innerHTML='El agente lo detectará del doc. adjunto. Vencimiento: <span id="expiry-display">—</span>';}
+if(prev!==mode){conversationHistory=[];documentGenerated=false;lastGeneratedDoc='';docVersions=[];pendingAttachments=[];renderAttachmentsStrip();const chatArea=document.getElementById('chat-area');if(chatArea){chatArea.innerHTML=`<div class="welcome" id="welcome-screen"><div class="welcome-icon">🤖</div><h2>¿Qué proceso vamos a documentar?</h2><p>Subí archivos, grabá un audio o describí el proceso con tus palabras. Yo te hago preguntas y redacto el documento formal completo.</p><div class="welcome-steps"><div class="welcome-step"><div class="welcome-step-num">1</div> Configurá tu API key</div><div class="welcome-step"><div class="welcome-step-num">2</div> Elegí el tipo de doc</div><div class="welcome-step"><div class="welcome-step-num">3</div> 🎙️ Grabá o adjuntá archivos</div><div class="welcome-step"><div class="welcome-step-num">4</div> Chateá con el agente</div></div></div>`;}document.getElementById('new-doc-btn').style.display='none';hideError();}}
 function updateAuthorName(val){lastAuthorName=val.trim();const inp=document.getElementById('doc-author-name');inp.classList.toggle('has-value',!!val.trim())}
 function updateAuthorPosition(val){lastAuthorPosition=val.trim();const inp=document.getElementById('doc-author-position');inp.classList.toggle('has-value',!!val.trim())}
 function updateDocTitle(val){lastDocTitle=val.trim()||'NUEVO DOCUMENTO';const inp=document.getElementById('doc-title-input');if(val.trim())inp.classList.add('has-value');else inp.classList.remove('has-value')}
