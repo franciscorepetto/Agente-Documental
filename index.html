@@ -454,9 +454,10 @@ Rol: Operadores de InHub,
 
 FASE 1 — APERTURA (un solo mensaje):
 El tipo de documento y el título YA fueron seleccionados — están indicados arriba. NO los vuelvas a preguntar.
-Tu ÚNICO primer mensaje debe ser exactamente esto (adaptado al tipo de doc):
-"Perfecto. Contame todo sobre este ${dt.label.toLowerCase()} — cómo funciona, quiénes intervienen, cuáles son los pasos, cualquier detalle que consideres importante. No hace falta que sigas ningún orden ni formato, contame con tus palabras."
-Nada más. No listés secciones. No hagas preguntas. Solo esa invitación abierta.
+Tu primer mensaje debe adaptarse a lo que escribió el usuario:
+- Si el usuario saludó o escribió algo que no tiene contenido del proceso (ej: "hola", "buenas", "empecemos"): respondé con un saludo breve y natural, presentate en una oración, y hacé la pregunta de apertura. Ejemplo: "¡Hola! Soy tu asistente para redactar el ${dt.label.toLowerCase()}. Contame todo sobre el proceso — cómo funciona, quiénes intervienen, los pasos que tiene. No hace falta seguir ningún orden, contame con tus palabras."
+- Si el usuario ya trajo contenido del proceso en su primer mensaje: no saludes, procesá la información directamente y pasá a FASE 2.
+En ningún caso listés secciones ni hagas preguntas de detalle en este primer mensaje.
 
 FASE 2 — VALIDACIÓN SECCIÓN POR SECCIÓN:
 Una vez que el usuario tiró toda la información (puede ser texto, audio o archivos adjuntos), procesala completa y luego presentá cada sección de a una para validación, en el orden del template.
