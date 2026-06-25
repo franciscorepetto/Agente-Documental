@@ -275,13 +275,13 @@ body{font-family:'Montserrat',sans-serif;background:var(--bg);color:var(--ink);m
       <div class="drop-overlay">📎 Soltá el archivo acá</div>
       <div class="welcome" id="welcome-screen">
         <div class="welcome-icon">🤖</div>
-        <h2>¿Qué proceso vamos a documentar?</h2>
-        <p>Subí archivos, grabá un audio o describí el proceso con tus palabras. Yo te hago preguntas y redacto el documento formal completo.</p>
+        <h2>Documentación de procesos corporativos</h2>
+        <p>Adjuntá archivos, grabá un audio o describí el proceso. El agente realizará las consultas necesarias y redactará el documento formal.</p>
         <div class="welcome-steps">
           <div class="welcome-step"><div class="welcome-step-num">1</div> Configurá tu API key</div>
           <div class="welcome-step"><div class="welcome-step-num">2</div> Elegí el tipo de doc</div>
           <div class="welcome-step"><div class="welcome-step-num">3</div> 🎙️ Grabá o adjuntá archivos</div>
-          <div class="welcome-step"><div class="welcome-step-num">4</div> Chateá con el agente</div>
+          <div class="welcome-step"><div class="welcome-step-num">4</div> Interactuá con el agente</div>
         </div>
       </div>
     </div>
@@ -290,7 +290,7 @@ body{font-family:'Montserrat',sans-serif;background:var(--bg);color:var(--ink);m
       <div class="record-banner" id="record-banner">
         <div class="record-dot"></div>
         <span id="record-time">0:00</span>
-        <span>Grabando... hacé clic en 🎙️ para detener y transcribir</span>
+        <span>Grabando... hacé clic en 🎙️ para detener</span>
       </div>
       <div class="attachments-strip" id="attachments-strip"></div>
       <div class="input-wrap">
@@ -298,7 +298,7 @@ body{font-family:'Montserrat',sans-serif;background:var(--bg);color:var(--ink);m
           <button class="input-action-btn" id="record-btn" onclick="toggleRecording()" title="Grabar audio">🎙️</button>
           <button class="input-action-btn" onclick="document.getElementById('file-input').click()" title="Adjuntar archivo">📎</button>
         </div>
-        <textarea id="user-input" placeholder="Describí el proceso, grabá un audio o subí un archivo..." rows="1" onkeydown="handleKeydown(event)" oninput="autoResize(this)"></textarea>
+        <textarea id="user-input" placeholder="Ingresá la descripción del proceso, grabá un audio o adjuntá un archivo..." rows="1" onkeydown="handleKeydown(event)" oninput="autoResize(this)"></textarea>
         <button class="send-btn" id="send-btn" onclick="sendMessage()">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
             <line x1="22" y1="2" x2="11" y2="13"></line>
@@ -454,7 +454,7 @@ Rol: Operadores de InHub,
 
 FASE 1 — APERTURA (un solo mensaje):
 El tipo de documento y el título YA fueron seleccionados — están indicados arriba. NO los vuelvas a preguntar.
-Respondé al primer mensaje del usuario de forma natural, adaptándote a lo que escribió. Tu objetivo en este primer turno es siempre terminar invitando al usuario a contarte todo sobre el proceso, con sus palabras y sin preocuparse por el orden. No listés secciones ni hagas preguntas de detalle todavía.
+Respondé al primer mensaje del usuario de forma directa y profesional, adaptándote a lo que escribió. Tu objetivo en este primer turno es invitar al usuario a describir el proceso con el nivel de detalle que considere necesario, sin seguir un orden particular. No listés secciones ni hagas preguntas de detalle todavía.
 
 FASE 2 — VALIDACIÓN SECCIÓN POR SECCIÓN:
 Una vez que el usuario tiró toda la información (puede ser texto, audio o archivos adjuntos), procesala completa y luego presentá cada sección de a una para validación, en el orden del template.
@@ -464,16 +464,16 @@ Reglas de esta fase:
 - Formato de presentación de cada sección:
   "**[NOMBRE DE SECCIÓN]**
   [Lo que redactaste para esa sección en formato final, listo para el documento]
-  ¿Está bien así o querés cambiar algo?"
+  ¿El contenido es correcto o requiere algún ajuste?"
 - Si el usuario corrige, incorporá el cambio y confirmá antes de seguir.
-- Si el usuario no mencionó información suficiente para una sección, decíselo y preguntá específicamente: "No tengo información sobre [SECCIÓN]. [UNA pregunta concreta]."
+- Si el usuario no mencionó información suficiente para una sección, indicáselo y preguntá específicamente: "No cuento con información suficiente para [SECCIÓN]. [UNA pregunta concreta]."
 - PROHIBIDO mostrar en el chat las secciones Validez y Revisión, Historial de Revisiones y Aprobación. Se generan automáticamente en el documento. Solo mencioná en una línea: "Las secciones de Validez, Historial y Aprobación se completan automáticamente." Nunca muestres tablas ni contenido de esas secciones en el chat.
 - Una vez validadas todas las secciones, pasá a FASE 3.
 - PROHIBIDO pasar a la siguiente sección sin confirmación explícita del usuario ("sí", "ok", "está bien", "dale", "correcto" o similar).
 
 FASE 3 — GENERACIÓN:
 - Solo generá el documento cuando hayas pasado por al menos los turnos 1 a 4.
-- Avisá: "Tengo suficiente información. ¿Querés que genere el documento ahora o hay algo más que agregar?"
+- Avisá: "Cuento con información suficiente para generar el documento. ¿Se puede proceder o hay información adicional a incorporar?"
 - Cuando el usuario confirme, generá EXACTAMENTE en este formato:
   Línea 1: "📄 DOCUMENTO GENERADO:"
   Línea 2: "TÍTULO: ${titulo}"
@@ -497,8 +497,8 @@ ${docMode==='update'?`━━ MODO ACTUALIZACIÓN — REGLAS ESPECIALES ━━
 REGLA ABSOLUTA: En modo actualización NUNCA podés inventar ni generar contenido propio. Todo el contenido del documento actualizado debe basarse en el documento original que adjuntó el usuario. Si no ves el documento original adjunto, DEBÉS pedirlo obligatoriamente y NO avanzar bajo ningún concepto.
 
 Ignorá las fases 1-3 de arriba. Seguí estrictamente este flujo:
-1. OBLIGATORIO — Si no ves un documento adjunto en el mensaje del usuario, respondé ÚNICAMENTE con: "Para poder actualizar el documento, necesito que me adjuntés el archivo original (Word, PDF u otro formato). Sin el documento original no puedo continuar." No hagas nada más.
-2. Una vez que recibas el documento original adjunto, leelo completo, confirmá brevemente qué documento recibiste (título, tipo, versión si figura) y preguntá: ¿Cuáles son los cambios que querés hacer?
+1. OBLIGATORIO — Si no ves un documento adjunto en el mensaje del usuario, respondé ÚNICAMENTE con: "Para proceder con la actualización, es necesario adjuntar el archivo original (Word, PDF u otro formato compatible). Sin el documento original no es posible continuar." No hagas nada más.
+2. Una vez que recibas el documento original adjunto, leelo completo, confirmá brevemente qué documento recibiste (título, tipo, versión si figura) y preguntá: ¿Cuáles son los cambios a realizar?
 3. Cuando el usuario describa los cambios, generá el documento actualizado con el formato estándar (📄 DOCUMENTO GENERADO: etc.) tomando como base EXCLUSIVAMENTE el contenido del documento original recibido, modificando solo lo que el usuario pidió. NUNCA reemplaces contenido real con texto inventado o genérico.
    - En la sección "10. HISTORIAL DE REVISIONES", conservá todas las filas existentes y AGREGÁ una nueva fila: "${lastDocVersion} | DD/MMM/AAAA | [resumen breve de los cambios]".
    - En la sección "11. APROBACIÓN", usá los datos del redactor si están disponibles.`:''}
@@ -551,8 +551,8 @@ const titleInp=document.getElementById('doc-title-input');if(!titleInp.value.tri
       const docContent=rawDoc;lastGeneratedDoc=docContent;documentGenerated=true;
       if(beforeDoc)addMessage('assistant',beforeDoc);addDocumentMessage(docContent);document.getElementById('new-doc-btn').style.display='flex'}else{addMessage('assistant',reply)}}catch(err){removeTyping(typingId);showError(err.message);conversationHistory.pop()}finally{isLoading=false;document.getElementById('send-btn').disabled=false}}
 function addMessage(role,text,attachmentNames=[]){const chatArea=document.getElementById('chat-area'),msgEl=document.createElement('div');msgEl.className=`msg ${role}`;const avatar=role==='assistant'?'🤖':'👤';const extMap={'webm':'audio','mp3':'audio','wav':'audio','m4a':'audio','pdf':'pdf','docx':'docx','pptx':'pptx','png':'image','jpg':'image','jpeg':'image','bpm':'bizagi','xml':'bizagi'};const iconMap={audio:'🎙️',pdf:'📄',docx:'📝',pptx:'📊',image:'🖼️',bizagi:'🔷',file:'📎'};const pillsHtml=attachmentNames.map(name=>{const ext=name.split('.').pop().toLowerCase();const icon=iconMap[extMap[ext]||'file'];return`<div class="attach-pill">${icon} ${name}</div>`}).join('');msgEl.innerHTML=`<div class="msg-avatar">${avatar}</div><div class="msg-bubble">${pillsHtml}${formatText(text)}</div>`;chatArea.appendChild(msgEl);scrollToBottom()}
-function addDocumentMessage(docContent){const chatArea=document.getElementById('chat-area'),msgEl=document.createElement('div');msgEl.className='msg assistant';const dt=docTypeInfo[selectedDocType];const vIdx=docVersions.length;docVersions.push({content:docContent,title:lastDocTitle,docType:selectedDocType});const vLabel=docVersions.length>1?` <span style="font-size:10px;color:var(--ink3)">v${docVersions.length}</span>`:'';msgEl.innerHTML=`<div class="msg-avatar">🤖</div><div class="msg-bubble"><p>✅ ¡Listo! Acá está el <strong>${lastDocTitle || dt.label}</strong> completo.${vLabel} Revisalo y si necesitás ajustes, avisame.</p><div class="doc-preview"><div class="doc-preview-header"><div class="doc-preview-title">${dt.icon} ${dt.label} · ${dt.code}</div><div class="doc-actions"><button class="doc-btn ghost" onclick="copyDocVersion(${vIdx})">📋 Copiar</button><button class="doc-btn ghost" onclick="downloadDocVersion(${vIdx})">⬇ .txt</button><button class="doc-btn primary" onclick="downloadDocxVersion(event,${vIdx})">📝 Descargar Word</button></div></div><div class="doc-preview-body">${escapeHtml(docContent)}</div></div></div>`;chatArea.appendChild(msgEl);scrollToBottom();
-setTimeout(()=>{const warn=document.createElement('div');warn.className='msg assistant';warn.innerHTML=`<div class="msg-avatar">🤖</div><div class="msg-bubble" style="background:#FFF8E1;border-left:3px solid #F59E0B"><p>⚠️ <strong>Recordá</strong>: antes de publicar este documento debe pasar por revisión y aprobación del área de <strong>Planeamiento y Excelencia Operativa</strong>.</p></div>`;document.getElementById('chat-area').appendChild(warn);scrollToBottom();},300);setTimeout(()=>{const next=document.createElement('div');next.className='msg assistant';next.innerHTML=`<div class="msg-avatar">🤖</div><div class="msg-bubble" style="background:#E8F5E9;border-left:3px solid #43A047"><p>📋 <strong>Próximos pasos para oficializar este documento:</strong></p><ol style="margin:8px 0 0 16px;padding:0"><li style="margin-bottom:6px">✍️ El <strong>responsable del área</strong> debe <strong>firmar</strong> el proceso / instructivo / procedimiento.</li><li>✅ El documento debe ser <strong>validado por el equipo de Mejora Continua</strong> antes de su publicación y puesta en vigencia.</li></ol></div>`;document.getElementById('chat-area').appendChild(next);scrollToBottom();},700);}
+function addDocumentMessage(docContent){const chatArea=document.getElementById('chat-area'),msgEl=document.createElement('div');msgEl.className='msg assistant';const dt=docTypeInfo[selectedDocType];const vIdx=docVersions.length;docVersions.push({content:docContent,title:lastDocTitle,docType:selectedDocType});const vLabel=docVersions.length>1?` <span style="font-size:10px;color:var(--ink3)">v${docVersions.length}</span>`:'';msgEl.innerHTML=`<div class="msg-avatar">🤖</div><div class="msg-bubble"><p>✅ El documento <strong>${lastDocTitle || dt.label}</strong> fue generado.${vLabel} Revisarlo y, de ser necesario, indicar los ajustes requeridos.</p><div class="doc-preview"><div class="doc-preview-header"><div class="doc-preview-title">${dt.icon} ${dt.label} · ${dt.code}</div><div class="doc-actions"><button class="doc-btn ghost" onclick="copyDocVersion(${vIdx})">📋 Copiar</button><button class="doc-btn ghost" onclick="downloadDocVersion(${vIdx})">⬇ .txt</button><button class="doc-btn primary" onclick="downloadDocxVersion(event,${vIdx})">📝 Descargar Word</button></div></div><div class="doc-preview-body">${escapeHtml(docContent)}</div></div></div>`;chatArea.appendChild(msgEl);scrollToBottom();
+setTimeout(()=>{const warn=document.createElement('div');warn.className='msg assistant';warn.innerHTML=`<div class="msg-avatar">🤖</div><div class="msg-bubble" style="background:#FFF8E1;border-left:3px solid #F59E0B"><p>⚠️ <strong>Importante</strong>: antes de publicar este documento debe pasar por revisión y aprobación del área de <strong>Planeamiento y Excelencia Operativa</strong>.</p></div>`;document.getElementById('chat-area').appendChild(warn);scrollToBottom();},300);setTimeout(()=>{const next=document.createElement('div');next.className='msg assistant';next.innerHTML=`<div class="msg-avatar">🤖</div><div class="msg-bubble" style="background:#E8F5E9;border-left:3px solid #43A047"><p>📋 <strong>Próximos pasos para oficializar este documento:</strong></p><ol style="margin:8px 0 0 16px;padding:0"><li style="margin-bottom:6px">✍️ El <strong>responsable del área</strong> debe <strong>firmar</strong> el proceso / instructivo / procedimiento.</li><li>✅ El documento debe ser <strong>validado por el equipo de Mejora Continua</strong> antes de su publicación y puesta en vigencia.</li></ol></div>`;document.getElementById('chat-area').appendChild(next);scrollToBottom();},700);}
 function formatText(text){return text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\*(.*?)\*/g,'<em>$1</em>').replace(/\n\n/g,'</p><p>').replace(/\n/g,'<br>').replace(/^/,'<p>').replace(/$/,'</p>')}
 function escapeHtml(t){return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
 let typingCounter=0;
