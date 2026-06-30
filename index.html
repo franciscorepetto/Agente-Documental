@@ -513,8 +513,10 @@ async function handleFileSelect(event){const files=Array.from(event.target.files
 function handleDragOver(e){e.preventDefault();e.stopPropagation();document.getElementById('chat-area').classList.add('drag-over');}
 function handleDragLeave(e){e.preventDefault();e.stopPropagation();if(!document.getElementById('chat-area').contains(e.relatedTarget)){document.getElementById('chat-area').classList.remove('drag-over');}}
 async function handleDrop(e){e.preventDefault();e.stopPropagation();document.getElementById('chat-area').classList.remove('drag-over');const files=Array.from(e.dataTransfer.files);for(const file of files){addProcessingTag(file.name);try{const att=await processFile(file);removeProcessingTags();addAttachment(att)}catch(err){removeProcessingTags();showError(`Error procesando "${file.name}": ${err.message}`)}}}
+const MAX_AUDIO_BYTES=25*1024*1024;
+function formatFileSize(bytes){if(bytes>=1024*1024)return(bytes/(1024*1024)).toFixed(1)+' MB';return(bytes/1024).toFixed(0)+' KB'}
 async function processFile(file){const name=file.name,ext=name.split('.').pop().toLowerCase();
-if(['mp3','wav','m4a','webm','ogg','flac'].includes(ext)){const text=await transcribeAudio(file,name);return{type:'audio',name,content:`[Transcripción de audio: ${name}]\n${text}`}}
+if(['mp3','wav','m4a','webm','ogg','flac'].includes(ext)){if(file.size>MAX_AUDIO_BYTES){throw new Error(`"${name}" supera el límite de 25 MB para transcripción (tamaño: ${formatFileSize(file.size)}). Comprimí el archivo o convertilo a MP3 a menor calidad antes de adjuntarlo.`)}const text=await transcribeAudio(file,name);return{type:'audio',name,content:`[Transcripción de audio: ${name}]\n${text}`}}
 if(ext==='pdf'){const text=await extractPdfText(file);if(text.length<50)showWarning('Este PDF parece ser una imagen escaneada — el agente no podrá leer su contenido. Convertí las páginas a imágenes (PNG/JPG) y adjuntalas para que funcione correctamente.');return{type:'pdf',name,content:`[Contenido del PDF: ${name}]\n${text}`}}
 if(ext==='docx'){const text=await extractDocxText(file);return{type:'docx',name,content:`[Contenido del Word: ${name}]\n${text}`}}
 if(ext==='pptx'){const text=await extractPptxText(file);return{type:'pptx',name,content:`[Contenido del PowerPoint: ${name}]\n${text}`}}
